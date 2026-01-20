@@ -1,0 +1,1117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions targetNamespace="urn:SPDServicerService" xmlns:apachesoap="http://xml.apache.org/xml-soap" xmlns:impl="urn:SPDServicerService" xmlns:intf="urn:SPDServicerService" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:wsdlsoap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<!--WSDL created by Apache Axis version: 1.4
+Built on Apr 22, 2006 (06:55:48 PDT)-->
+ <wsdl:types>
+  <schema targetNamespace="urn:SPDServicerService" xmlns="http://www.w3.org/2001/XMLSchema">
+   <complexType name="UserInfo">
+    <sequence>
+     <element name="UserID" nillable="true" type="xsd:string"/>
+     <element name="Password" nillable="true" type="xsd:string"/>
+     <element name="SvcrAcct" nillable="true" type="xsd:string"/>
+    </sequence>
+   </complexType>
+   <complexType name="TechCapacityByDay">
+    <sequence>
+     <element name="Capacity" nillable="true" type="xsd:string"/>
+     <element name="Day" nillable="true" type="xsd:string"/>
+     <element name="TimeBand" nillable="true" type="xsd:string"/>
+    </sequence>
+   </complexType>
+   <complexType name="TechInfo">
+    <sequence>
+     <element name="UserInfo" nillable="true" type="impl:UserInfo"/>
+     <element name="Name" nillable="true" type="xsd:string"/>
+     <element name="Key" nillable="true" type="xsd:string"/>
+     <element name="GroupKey" nillable="true" type="xsd:string"/>
+     <element name="CellPhone" nillable="true" type="xsd:string"/>
+     <element maxOccurs="unbounded" name="BasicCapacity" nillable="true" type="impl:TechCapacityByDay"/>
+    </sequence>
+   </complexType>
+   <element name="getTechInfo" type="impl:TechInfo"/>
+   <complexType name="Error">
+    <sequence>
+     <element name="Code" nillable="true" type="xsd:string"/>
+     <element name="Description" nillable="true" type="xsd:string"/>
+     <element name="Cause" nillable="true" type="xsd:string"/>
+    </sequence>
+   </complexType>
+   <complexType name="ResponseInfo">
+    <sequence>
+     <element name="erroroccurred" type="xsd:string"/>
+     <element name="ackmessage" nillable="true" type="xsd:string"/>
+     <element name="updatedate" nillable="true" type="xsd:string"/>
+     <element name="errorData" nillable="true" type="impl:Error"/>
+    </sequence>
+   </complexType>
+   <element name="getResponseInfo" type="impl:ResponseInfo"/>
+   <element name="getTechInfo1" type="impl:TechInfo"/>
+   <element name="getResponseInfo1" type="impl:ResponseInfo"/>
+   <complexType name="TechCapacityByDate">
+    <sequence>
+     <element name="TechKey" nillable="true" type="xsd:string"/>
+     <element name="Capacity" nillable="true" type="xsd:string"/>
+     <element name="DateTime" nillable="true" type="xsd:string"/>
+     <element name="TimeBand" nillable="true" type="xsd:string"/>
+    </sequence>
+   </complexType>
+   <complexType name="MultTechCapacity">
+    <sequence>
+     <element name="UserInfo" nillable="true" type="impl:UserInfo"/>
+     <element maxOccurs="unbounded" name="techCapacity" type="impl:TechCapacityByDate"/>
+    </sequence>
+   </complexType>
+   <element name="updateTechCapcity" type="impl:MultTechCapacity"/>
+   <element name="getResponseInfo2" type="impl:ResponseInfo"/>
+   <complexType name="ArrayOf_xsd_string">
+    <sequence>
+     <element maxOccurs="unbounded" minOccurs="0" name="item" type="xsd:string"/>
+    </sequence>
+   </complexType>
+   <complexType name="GroupInfo">
+    <sequence>
+     <element name="UserInfo" nillable="true" type="impl:UserInfo"/>
+     <element name="Name" nillable="true" type="xsd:string"/>
+     <element name="Key" nillable="true" type="xsd:string"/>
+     <element name="DisPatchOfficeName" nillable="true" type="xsd:string"/>
+     <element name="WarrantyType" nillable="true" type="impl:ArrayOf_xsd_string"/>
+     <element name="ServiceLocation" nillable="true" type="impl:ArrayOf_xsd_string"/>
+     <element name="ServiceType" nillable="true" type="impl:ArrayOf_xsd_string"/>
+     <element name="Industry" nillable="true" type="impl:ArrayOf_xsd_string"/>
+    </sequence>
+   </complexType>
+   <element name="getGroupInfo" type="impl:GroupInfo"/>
+   <element name="getResponseInfo3" type="impl:ResponseInfo"/>
+   <element name="getGroupInfo1" type="impl:GroupInfo"/>
+   <element name="getResponseInfo4" type="impl:ResponseInfo"/>
+   <complexType name="AreaInfo">
+    <sequence>
+     <element name="UserInfo" nillable="true" type="impl:UserInfo"/>
+     <element name="AreaKey" nillable="true" type="xsd:string"/>
+     <element name="AreaName" nillable="true" type="xsd:string"/>
+     <element name="DispatchOfficeName" nillable="true" type="xsd:string"/>
+     <element name="GroupKey" nillable="true" type="impl:ArrayOf_xsd_string"/>
+     <element name="PostcodeList" nillable="true" type="impl:ArrayOf_xsd_string"/>
+    </sequence>
+   </complexType>
+   <element name="getAreaInfo" type="impl:AreaInfo"/>
+   <element name="getResponseInfo5" type="impl:ResponseInfo"/>
+   <element name="getAreaInfo1" type="impl:AreaInfo"/>
+   <element name="getResponseInfo6" type="impl:ResponseInfo"/>
+   <complexType name="ServicerInfo">
+    <sequence>
+     <element name="UserInfo" nillable="true" type="impl:UserInfo"/>
+     <element name="Name" nillable="true" type="xsd:string"/>
+     <element name="Address1" nillable="true" type="xsd:string"/>
+     <element name="Address2" nillable="true" type="xsd:string"/>
+     <element name="PostcodeLevel1" nillable="true" type="xsd:string"/>
+     <element name="PostcodeLevel2" nillable="true" type="xsd:string"/>
+     <element name="PostcodeLevel3" nillable="true" type="xsd:string"/>
+     <element name="Postcode" nillable="true" type="xsd:string"/>
+     <element name="Country" nillable="true" type="xsd:string"/>
+     <element name="Phone" nillable="true" type="xsd:string"/>
+     <element name="CellPhone" nillable="true" type="xsd:string"/>
+     <element name="FaxNo" nillable="true" type="xsd:string"/>
+     <element name="EmailID" nillable="true" type="xsd:string"/>
+     <element name="TimeBand" nillable="true" type="impl:ArrayOf_xsd_string"/>
+     <element name="Product" nillable="true" type="impl:ArrayOf_xsd_string"/>
+     <element name="Brand" nillable="true" type="impl:ArrayOf_xsd_string"/>
+    </sequence>
+   </complexType>
+   <element name="getServicerInfo" type="impl:ServicerInfo"/>
+   <element name="getResponseInfo7" type="impl:ResponseInfo"/>
+   <complexType name="DispatchInfo">
+    <sequence>
+     <element name="UserInfo" nillable="true" type="impl:UserInfo"/>
+     <element name="OfficeName" nillable="true" type="xsd:string"/>
+     <element name="ContactName" nillable="true" type="xsd:string"/>
+     <element name="Address1" nillable="true" type="xsd:string"/>
+     <element name="Address2" nillable="true" type="xsd:string"/>
+     <element name="PostcodeLevel1" nillable="true" type="xsd:string"/>
+     <element name="PostcodeLevel2" nillable="true" type="xsd:string"/>
+     <element name="PostcodeLevel3" nillable="true" type="xsd:string"/>
+     <element name="Postcode" nillable="true" type="xsd:string"/>
+     <element name="Country" nillable="true" type="xsd:string"/>
+     <element name="Email" nillable="true" type="xsd:string"/>
+     <element name="Fax" nillable="true" type="xsd:string"/>
+     <element name="IVRPhoneNumber" type="xsd:string"/>
+     <element name="EmailNotification" nillable="true" type="xsd:string"/>
+     <element name="FaxNotification" nillable="true" type="xsd:string"/>
+     <element name="IVRNotification" type="xsd:string"/>
+    </sequence>
+   </complexType>
+   <element name="getDispatchInfo" type="impl:DispatchInfo"/>
+   <element name="getResponseInfo8" type="impl:ResponseInfo"/>
+   <complexType name="CallInfoSearch">
+    <sequence>
+     <element name="UserInfo" nillable="true" type="impl:UserInfo"/>
+     <element name="FromDateTime" nillable="true" type="xsd:string"/>
+     <element name="ToDateTime" nillable="true" type="xsd:string"/>
+     <element name="Callno" nillable="true" type="xsd:string"/>
+     <element name="Versionno" nillable="true" type="xsd:string"/>
+    </sequence>
+   </complexType>
+   <element name="getCallInfoSearch" type="impl:CallInfoSearch"/>
+   <complexType name="ConsumerInfo">
+    <sequence>
+     <element name="ConsumerFirstName" nillable="true" type="xsd:string"/>
+     <element name="ConsumerLastName" nillable="true" type="xsd:string"/>
+     <element name="ConsumerAddress1" nillable="true" type="xsd:string"/>
+     <element name="ConsumerAddress2" nillable="true" type="xsd:string"/>
+     <element name="PostcodeLevel1" nillable="true" type="xsd:string"/>
+     <element name="PostcodeLevel2" nillable="true" type="xsd:string"/>
+     <element name="PostcodeLevel3" nillable="true" type="xsd:string"/>
+     <element name="Postcode" nillable="true" type="xsd:string"/>
+     <element name="Country" nillable="true" type="xsd:string"/>
+     <element name="Phone1" nillable="true" type="xsd:string"/>
+     <element name="Phone2" nillable="true" type="xsd:string"/>
+     <element name="CellPhone" nillable="true" type="xsd:string"/>
+     <element name="EmaiIld" nillable="true" type="xsd:string"/>
+    </sequence>
+   </complexType>
+   <complexType name="ProductInfo">
+    <sequence>
+     <element name="SPBrandId" type="xsd:string"/>
+     <element name="SPBrandDesc" type="xsd:string"/>
+     <element name="SPProductId" type="xsd:string"/>
+     <element name="SPProductDesc" type="xsd:string"/>
+     <element name="MobelNo" nillable="true" type="xsd:string"/>
+     <element name="SerialNo" nillable="true" type="xsd:string"/>
+     <element name="InstallDate" nillable="true" type="xsd:string"/>
+     <element name="ServiceContractNumber" nillable="true" type="xsd:string"/>
+     <element name="ServiceContractExpireDate" nillable="true" type="xsd:string"/>
+     <element name="PoNumber" nillable="true" type="xsd:string"/>
+     <element name="PoAmount" nillable="true" type="xsd:string"/>
+     <element name="CopayAmount" nillable="true" type="xsd:string"/>
+    </sequence>
+   </complexType>
+   <complexType name="ShippingInfo">
+    <sequence>
+     <element name="TrackingNo" nillable="true" type="xsd:string"/>
+     <element name="Description" nillable="true" type="xsd:string"/>
+     <element name="ShipCarrier" nillable="true" type="xsd:string"/>
+     <element name="ShipMethod" nillable="true" type="xsd:string"/>
+     <element name="ShipURL" nillable="true" type="xsd:string"/>
+     <element name="ShipDate" nillable="true" type="xsd:string"/>
+     <element name="EstDeliveryDate" nillable="true" type="xsd:string"/>
+     <element name="ShipType" nillable="true" type="xsd:string"/>
+    </sequence>
+   </complexType>
+   <complexType name="ArrayOfShippingInfo">
+    <sequence>
+     <element maxOccurs="unbounded" minOccurs="0" name="item" type="impl:ShippingInfo"/>
+    </sequence>
+   </complexType>
+   <complexType name="CallInfo">
+    <sequence>
+     <element name="ServicerAccount" nillable="true" type="xsd:string"/>
+     <element name="GroupKey" nillable="true" type="xsd:string"/>
+     <element name="TechKey" nillable="true" type="xsd:string"/>
+     <element name="CallNumber" nillable="true" type="xsd:string"/>
+     <element name="MfgId" nillable="true" type="xsd:string"/>
+     <element name="FSSCallId" type="xsd:string"/>
+     <element name="ServiceCenter" nillable="true" type="xsd:string"/>
+     <element name="WarrantyType" nillable="true" type="xsd:string"/>
+     <element name="ServicetType" nillable="true" type="xsd:string"/>
+     <element name="ServiceLocation" nillable="true" type="xsd:string"/>
+     <element name="ScheduleDate" nillable="true" type="xsd:string"/>
+     <element name="ScheduleTimePeriod" nillable="true" type="xsd:string"/>
+     <element name="ProblemType" nillable="true" type="xsd:string"/>
+     <element name="ProbelmDesc" nillable="true" type="xsd:string"/>
+     <element name="RepeatCall" nillable="true" type="xsd:string"/>
+     <element name="ForcedCall" nillable="true" type="xsd:string"/>
+     <element name="CallStatus" nillable="true" type="xsd:string"/>
+     <element name="SPCallStatusID" type="xsd:string"/>
+     <element name="CallSubStatus" nillable="true" type="xsd:string"/>
+     <element name="SPCallSubStatusID" type="xsd:string"/>
+     <element name="ConsumerInfo" nillable="true" type="impl:ConsumerInfo"/>
+     <element name="ProductInfo" nillable="true" type="impl:ProductInfo"/>
+     <element name="ShippingInfo" nillable="true" type="impl:ArrayOfShippingInfo"/>
+     <element name="CallCreatedOn" nillable="true" type="xsd:string"/>
+     <element name="AuthNo" nillable="true" type="xsd:string"/>
+    </sequence>
+   </complexType>
+   <complexType name="CallInfoResponce">
+    <sequence>
+     <element name="numberOfCalls" nillable="true" type="xsd:string"/>
+     <element maxOccurs="unbounded" name="CallInfo" nillable="true" type="impl:CallInfo"/>
+     <element name="ErrorInfo" nillable="true" type="impl:Error"/>
+    </sequence>
+   </complexType>
+   <element name="getCallInfoResponce" type="impl:CallInfoResponce"/>
+   <complexType name="PartsInfo">
+    <sequence>
+     <element name="PartsVendorId" nillable="true" type="xsd:string"/>
+     <element name="PartsVendorName" nillable="true" type="xsd:string"/>
+     <element name="PartNo" nillable="true" type="xsd:string"/>
+     <element name="PartDesc" nillable="true" type="xsd:string"/>
+     <element name="PartLoc" nillable="true" type="xsd:string"/>
+     <element name="PartCoverage" nillable="true" type="xsd:string"/>
+     <element name="PartPrice" nillable="true" type="xsd:string"/>
+     <element name="OrderQuantity" nillable="true" type="xsd:string"/>
+     <element name="OrderDate" nillable="true" type="xsd:string"/>
+     <element name="PartStatusDate" nillable="true" type="xsd:string"/>
+     <element name="PartTrackingId" nillable="true" type="xsd:string"/>
+     <element name="PartTrackingUrl" nillable="true" type="xsd:string"/>
+     <element name="ShippingCarrier" nillable="true" type="xsd:string"/>
+     <element name="ShippingMethod" nillable="true" type="xsd:string"/>
+     <element name="InstalledDate" nillable="true" type="xsd:string"/>
+     <element name="InstalledQuantity" nillable="true" type="xsd:string"/>
+    </sequence>
+   </complexType>
+   <complexType name="Remarks">
+    <sequence>
+     <element name="NotesDate" nillable="true" type="xsd:string"/>
+     <element name="Notes" nillable="true" type="xsd:string"/>
+     <element name="AddedBy" nillable="true" type="xsd:string"/>
+    </sequence>
+   </complexType>
+   <complexType name="productReplacementInfo">
+    <sequence>
+     <element name="Brand" nillable="true" type="xsd:string"/>
+     <element name="Product" nillable="true" type="xsd:string"/>
+     <element name="ModelNo" nillable="true" type="xsd:string"/>
+     <element name="SerialNo" nillable="true" type="xsd:string"/>
+     <element name="SKU" nillable="true" type="xsd:string"/>
+     <element name="TrackingNo" nillable="true" type="xsd:string"/>
+     <element name="ShipMethod" nillable="true" type="xsd:string"/>
+    </sequence>
+   </complexType>
+   <complexType name="shippingInfo">
+    <sequence>
+     <element name="TrackingNo" nillable="true" type="xsd:string"/>
+     <element name="Description" nillable="true" type="xsd:string"/>
+     <element name="ShipCarrier" nillable="true" type="xsd:string"/>
+     <element name="ShipMethod" nillable="true" type="xsd:string"/>
+     <element name="ShipURL" nillable="true" type="xsd:string"/>
+     <element name="ShipDate" nillable="true" type="xsd:string"/>
+     <element name="EstDeliveryDate" nillable="true" type="xsd:string"/>
+     <element name="ShipType" nillable="true" type="xsd:string"/>
+    </sequence>
+   </complexType>
+   <complexType name="UpdateCall">
+    <sequence>
+     <element name="UserInfo" nillable="true" type="impl:UserInfo"/>
+     <element name="CallNumber" nillable="true" type="xsd:string"/>
+     <element name="MfgId" nillable="true" type="xsd:string"/>
+     <element name="FSSCallId" nillable="true" type="xsd:string"/>
+     <element name="ScheduleDate" nillable="true" type="xsd:string"/>
+     <element name="ScheduleTimePeriod" nillable="true" type="xsd:string"/>
+     <element name="ProbelmDesc" nillable="true" type="xsd:string"/>
+     <element name="CallStatus" nillable="true" type="xsd:string"/>
+     <element name="SPCallStatusID" nillable="true" type="xsd:string"/>
+     <element name="CallSubStatus" nillable="true" type="xsd:string"/>
+     <element name="SPCallSubStatusID" nillable="true" type="xsd:string"/>
+     <element name="ProductInfo" nillable="true" type="impl:ProductInfo"/>
+     <element name="ConsumerInfo" nillable="true" type="impl:ConsumerInfo"/>
+     <element name="Parts" nillable="true" type="impl:PartsInfo"/>
+     <element name="Remarks" nillable="true" type="impl:Remarks"/>
+     <element name="ETA" nillable="true" type="xsd:string"/>
+     <element name="ETF" nillable="true" type="xsd:string"/>
+     <element name="TechName" nillable="true" type="xsd:string"/>
+     <element name="ReplaceProduct" nillable="true" type="impl:productReplacementInfo"/>
+     <element name="ReturnShipping" nillable="true" type="impl:shippingInfo"/>
+     <element name="CompletedDate" nillable="true" type="xsd:string"/>
+     <element name="ReasonCode" nillable="true" type="xsd:string"/>
+     <element name="WarrantyType" nillable="true" type="xsd:string"/>
+     <element name="JobCode" nillable="true" type="xsd:string"/>
+     <element name="ServicerJobId" nillable="true" type="xsd:string"/>
+    </sequence>
+   </complexType>
+   <element name="updateCallInfoObj" type="impl:UpdateCall"/>
+   <element name="getResponseInfo9" type="impl:ResponseInfo"/>
+   <element name="getCallNotesRequest" type="impl:CallInfoSearch"/>
+   <complexType name="Notes">
+    <sequence>
+     <element name="CallNumber" nillable="true" type="xsd:string"/>
+     <element name="MfgId" nillable="true" type="xsd:string"/>
+     <element name="FSSCallId" nillable="true" type="xsd:string"/>
+     <element maxOccurs="unbounded" name="RemarksCollection" nillable="true" type="impl:Remarks"/>
+    </sequence>
+   </complexType>
+   <complexType name="CallNotesResponce">
+    <sequence>
+     <element name="numberOfCalls" nillable="true" type="xsd:string"/>
+     <element maxOccurs="unbounded" name="NotesCollection" nillable="true" type="impl:Notes"/>
+     <element name="ErrorInfo" nillable="true" type="impl:Error"/>
+    </sequence>
+   </complexType>
+   <element name="getCallNotesResponse" type="impl:CallNotesResponce"/>
+   <complexType name="CallAttributesInfo">
+    <sequence>
+     <element name="UserInfo" nillable="true" type="impl:UserInfo"/>
+     <element name="FSSCallId" type="xsd:string"/>
+    </sequence>
+   </complexType>
+   <element name="getCallAttributesRequest" type="impl:CallAttributesInfo"/>
+   <complexType name="CallAttributes">
+    <sequence>
+     <element name="Label" nillable="true" type="xsd:string"/>
+     <element name="Value" nillable="true" type="xsd:string"/>
+    </sequence>
+   </complexType>
+   <complexType name="CallAttributesResponse">
+    <sequence>
+     <element name="FSSCallId" type="xsd:string"/>
+     <element maxOccurs="unbounded" name="CallAttributes" nillable="true" type="impl:CallAttributes"/>
+     <element name="ErrorInfo" nillable="true" type="impl:Error"/>
+    </sequence>
+   </complexType>
+   <element name="getCallAttributesResponse" type="impl:CallAttributesResponse"/>
+   <complexType name="PostcodeUpdate">
+    <sequence>
+     <element name="Postcode" nillable="true" type="xsd:string"/>
+     <element name="NetworkId" nillable="true" type="xsd:string"/>
+     <element name="MemberAccount" nillable="true" type="xsd:string"/>
+     <element name="AreaKey" nillable="true" type="xsd:string"/>
+     <element name="Operation" nillable="true" type="xsd:string"/>
+    </sequence>
+   </complexType>
+   <complexType name="updatePostcodeInfo">
+    <sequence>
+     <element name="UserInfo" nillable="true" type="impl:UserInfo"/>
+     <element name="PostcodeUpdateObj" nillable="true" type="impl:PostcodeUpdate"/>
+    </sequence>
+   </complexType>
+   <element name="updatePostcodeRequest" type="impl:updatePostcodeInfo"/>
+   <element name="updatePostcodeResponse" type="impl:ResponseInfo"/>
+   <complexType name="ProductCoverageInfo">
+    <sequence>
+     <element name="UserInfo" nillable="true" type="impl:UserInfo"/>
+     <element name="FSSCallId" type="xsd:string"/>
+    </sequence>
+   </complexType>
+   <element name="getProductCoverageRequest" type="impl:ProductCoverageInfo"/>
+   <complexType name="ProductCoverage">
+    <sequence>
+     <element name="Component" nillable="true" type="xsd:string"/>
+     <element name="Coverageelement" nillable="true" type="xsd:string"/>
+     <element name="Coveragedays" nillable="true" type="xsd:string"/>
+     <element name="BillTo" nillable="true" type="xsd:string"/>
+     <element name="MaxReimburse" nillable="true" type="xsd:string"/>
+     <element name="CoverageStartDate" nillable="true" type="xsd:string"/>
+     <element name="CoverageEndDate" nillable="true" type="xsd:string"/>
+     <element name="CreatedOn" nillable="true" type="xsd:string"/>
+    </sequence>
+   </complexType>
+   <complexType name="ProductCoverageResponse">
+    <sequence>
+     <element name="FSSCallId" type="xsd:string"/>
+     <element maxOccurs="unbounded" name="ProductCoverage" nillable="true" type="impl:ProductCoverage"/>
+     <element name="ErrorInfo" nillable="true" type="impl:Error"/>
+    </sequence>
+   </complexType>
+   <element name="getProductCoverageResponse" type="impl:ProductCoverageResponse"/>
+   <complexType name="CallAddressRequest">
+    <sequence>
+     <element name="UserInfo" nillable="true" type="impl:UserInfo"/>
+     <element name="FSSCallId" nillable="true" type="xsd:string"/>
+     <element name="AddressType" nillable="true" type="xsd:string"/>
+    </sequence>
+   </complexType>
+   <element name="getCallAddressRequest" type="impl:CallAddressRequest"/>
+   <complexType name="CallAddress">
+    <sequence>
+     <element name="AddressType" nillable="true" type="xsd:string"/>
+     <element name="FirstName" nillable="true" type="xsd:string"/>
+     <element name="MiddleName" nillable="true" type="xsd:string"/>
+     <element name="LastName" nillable="true" type="xsd:string"/>
+     <element name="Address1" nillable="true" type="xsd:string"/>
+     <element name="Address2" nillable="true" type="xsd:string"/>
+     <element name="PostcodeLevel1" nillable="true" type="xsd:string"/>
+     <element name="PostcodeLevel2" nillable="true" type="xsd:string"/>
+     <element name="PostcodeLevel3" nillable="true" type="xsd:string"/>
+     <element name="Postcode" nillable="true" type="xsd:string"/>
+     <element name="Country" nillable="true" type="xsd:string"/>
+     <element name="PhoneNumber1" nillable="true" type="xsd:string"/>
+     <element name="PhoneNumber2" nillable="true" type="xsd:string"/>
+     <element name="EmailAddress" nillable="true" type="xsd:string"/>
+     <element name="SiteId" nillable="true" type="xsd:string"/>
+    </sequence>
+   </complexType>
+   <complexType name="ArrayOfCallAddress">
+    <sequence>
+     <element maxOccurs="unbounded" minOccurs="0" name="item" type="impl:CallAddress"/>
+    </sequence>
+   </complexType>
+   <complexType name="CallAddressResponse">
+    <sequence>
+     <element name="FSSCallId" nillable="true" type="xsd:string"/>
+     <element name="AddressCount" nillable="true" type="xsd:string"/>
+     <element name="CallAddress" nillable="true" type="impl:ArrayOfCallAddress"/>
+     <element name="ErrorInfo" nillable="true" type="impl:Error"/>
+    </sequence>
+   </complexType>
+   <element name="getCallAddressResponse" type="impl:CallAddressResponse"/>
+   <element name="getTestService" type="xsd:string"/>
+   <element name="getTestServiceResponse" type="xsd:string"/>
+  </schema>
+ </wsdl:types>
+
+   <wsdl:message name="getCallInfoResponse">
+
+      <wsdl:part element="impl:getCallInfoResponce" name="getCallInfoResponce"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="updateDispatchOfficeInfoRequest">
+
+      <wsdl:part element="impl:getDispatchInfo" name="getDispatchInfo"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="updateTechInfoResponse">
+
+      <wsdl:part element="impl:getResponseInfo1" name="getResponseInfo1"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="updateAreaInfoResponse">
+
+      <wsdl:part element="impl:getResponseInfo6" name="getResponseInfo6"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="addGroupInfoResponse">
+
+      <wsdl:part element="impl:getResponseInfo3" name="getResponseInfo3"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="updateServicerInfoRequest">
+
+      <wsdl:part element="impl:getServicerInfo" name="getServicerInfo"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="getCallInfoRequest">
+
+      <wsdl:part element="impl:getCallInfoSearch" name="getCallInfoSearch"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="updateGroupInfoRequest">
+
+      <wsdl:part element="impl:getGroupInfo1" name="getGroupInfo1"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="getCallNotesRequest">
+
+      <wsdl:part element="impl:getCallNotesRequest" name="getCallNotesRequest"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="updateTechCapacityRequest">
+
+      <wsdl:part element="impl:updateTechCapcity" name="updateTechCapcity"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="updateGroupInfoResponse">
+
+      <wsdl:part element="impl:getResponseInfo4" name="getResponseInfo4"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="updateCallInfoResponse">
+
+      <wsdl:part element="impl:getResponseInfo9" name="getResponseInfo9"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="getCallAttributesRequest">
+
+      <wsdl:part element="impl:getCallAttributesRequest" name="getCallAttributesRequest"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="updatePostcodeRequest">
+
+      <wsdl:part element="impl:updatePostcodeRequest" name="updatePostcodeRequest"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="getCallAddressRequest">
+
+      <wsdl:part element="impl:getCallAddressRequest" name="getCallAddressRequest"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="addTechInfoRequest">
+
+      <wsdl:part element="impl:getTechInfo" name="getTechInfo"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="getProductCoverageRequest">
+
+      <wsdl:part element="impl:getProductCoverageRequest" name="getProductCoverageRequest"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="addGroupInfoRequest">
+
+      <wsdl:part element="impl:getGroupInfo" name="getGroupInfo"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="updateCallInfoRequest">
+
+      <wsdl:part element="impl:updateCallInfoObj" name="updateCallInfoObj"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="getProductCoverageResponse">
+
+      <wsdl:part element="impl:getProductCoverageResponse" name="getProductCoverageResponse"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="addTechInfoResponse">
+
+      <wsdl:part element="impl:getResponseInfo" name="getResponseInfo"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="getCallNotesResponse">
+
+      <wsdl:part element="impl:getCallNotesResponse" name="getCallNotesResponse"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="addAreaInfoResponse">
+
+      <wsdl:part element="impl:getResponseInfo5" name="getResponseInfo5"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="updateServicerInfoResponse">
+
+      <wsdl:part element="impl:getResponseInfo7" name="getResponseInfo7"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="updateTechCapacityResponse">
+
+      <wsdl:part element="impl:getResponseInfo2" name="getResponseInfo2"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="getCallAttributesResponse">
+
+      <wsdl:part element="impl:getCallAttributesResponse" name="getCallAttributesResponse"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="getTestServiceRequest">
+
+      <wsdl:part element="impl:getTestService" name="getTestService"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="updateTechInfoRequest">
+
+      <wsdl:part element="impl:getTechInfo1" name="getTechInfo1"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="addAreaInfoRequest">
+
+      <wsdl:part element="impl:getAreaInfo" name="getAreaInfo"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="getCallAddressResponse">
+
+      <wsdl:part element="impl:getCallAddressResponse" name="getCallAddressResponse"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="updateAreaInfoRequest">
+
+      <wsdl:part element="impl:getAreaInfo1" name="getAreaInfo1"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="updateDispatchOfficeInfoResponse">
+
+      <wsdl:part element="impl:getResponseInfo8" name="getResponseInfo8"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="updatePostcodeResponse">
+
+      <wsdl:part element="impl:updatePostcodeResponse" name="updatePostcodeResponse"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="getTestServiceResponse">
+
+      <wsdl:part element="impl:getTestServiceResponse" name="getTestServiceResponse"/>
+
+   </wsdl:message>
+
+   <wsdl:portType name="SPDService">
+
+      <wsdl:operation name="addTechInfo" parameterOrder="getTechInfo">
+
+         <wsdl:input message="impl:addTechInfoRequest" name="addTechInfoRequest"/>
+
+         <wsdl:output message="impl:addTechInfoResponse" name="addTechInfoResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="updateTechInfo" parameterOrder="getTechInfo1">
+
+         <wsdl:input message="impl:updateTechInfoRequest" name="updateTechInfoRequest"/>
+
+         <wsdl:output message="impl:updateTechInfoResponse" name="updateTechInfoResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="updateTechCapacity" parameterOrder="updateTechCapcity">
+
+         <wsdl:input message="impl:updateTechCapacityRequest" name="updateTechCapacityRequest"/>
+
+         <wsdl:output message="impl:updateTechCapacityResponse" name="updateTechCapacityResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="addGroupInfo" parameterOrder="getGroupInfo">
+
+         <wsdl:input message="impl:addGroupInfoRequest" name="addGroupInfoRequest"/>
+
+         <wsdl:output message="impl:addGroupInfoResponse" name="addGroupInfoResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="updateGroupInfo" parameterOrder="getGroupInfo1">
+
+         <wsdl:input message="impl:updateGroupInfoRequest" name="updateGroupInfoRequest"/>
+
+         <wsdl:output message="impl:updateGroupInfoResponse" name="updateGroupInfoResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="addAreaInfo" parameterOrder="getAreaInfo">
+
+         <wsdl:input message="impl:addAreaInfoRequest" name="addAreaInfoRequest"/>
+
+         <wsdl:output message="impl:addAreaInfoResponse" name="addAreaInfoResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="updateAreaInfo" parameterOrder="getAreaInfo1">
+
+         <wsdl:input message="impl:updateAreaInfoRequest" name="updateAreaInfoRequest"/>
+
+         <wsdl:output message="impl:updateAreaInfoResponse" name="updateAreaInfoResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="updateServicerInfo" parameterOrder="getServicerInfo">
+
+         <wsdl:input message="impl:updateServicerInfoRequest" name="updateServicerInfoRequest"/>
+
+         <wsdl:output message="impl:updateServicerInfoResponse" name="updateServicerInfoResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="updateDispatchOfficeInfo" parameterOrder="getDispatchInfo">
+
+         <wsdl:input message="impl:updateDispatchOfficeInfoRequest" name="updateDispatchOfficeInfoRequest"/>
+
+         <wsdl:output message="impl:updateDispatchOfficeInfoResponse" name="updateDispatchOfficeInfoResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getCallInfo" parameterOrder="getCallInfoSearch">
+
+         <wsdl:input message="impl:getCallInfoRequest" name="getCallInfoRequest"/>
+
+         <wsdl:output message="impl:getCallInfoResponse" name="getCallInfoResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="updateCallInfo" parameterOrder="updateCallInfoObj">
+
+         <wsdl:input message="impl:updateCallInfoRequest" name="updateCallInfoRequest"/>
+
+         <wsdl:output message="impl:updateCallInfoResponse" name="updateCallInfoResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getCallNotes" parameterOrder="getCallNotesRequest">
+
+         <wsdl:input message="impl:getCallNotesRequest" name="getCallNotesRequest"/>
+
+         <wsdl:output message="impl:getCallNotesResponse" name="getCallNotesResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getCallAttributes" parameterOrder="getCallAttributesRequest">
+
+         <wsdl:input message="impl:getCallAttributesRequest" name="getCallAttributesRequest"/>
+
+         <wsdl:output message="impl:getCallAttributesResponse" name="getCallAttributesResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="updatePostcode" parameterOrder="updatePostcodeRequest">
+
+         <wsdl:input message="impl:updatePostcodeRequest" name="updatePostcodeRequest"/>
+
+         <wsdl:output message="impl:updatePostcodeResponse" name="updatePostcodeResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getProductCoverage" parameterOrder="getProductCoverageRequest">
+
+         <wsdl:input message="impl:getProductCoverageRequest" name="getProductCoverageRequest"/>
+
+         <wsdl:output message="impl:getProductCoverageResponse" name="getProductCoverageResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getCallAddress" parameterOrder="getCallAddressRequest">
+
+         <wsdl:input message="impl:getCallAddressRequest" name="getCallAddressRequest"/>
+
+         <wsdl:output message="impl:getCallAddressResponse" name="getCallAddressResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getTestService" parameterOrder="getTestService">
+
+         <wsdl:input message="impl:getTestServiceRequest" name="getTestServiceRequest"/>
+
+         <wsdl:output message="impl:getTestServiceResponse" name="getTestServiceResponse"/>
+
+      </wsdl:operation>
+
+   </wsdl:portType>
+
+   <wsdl:binding name="SPDServiceSoapBinding" type="impl:SPDService">
+
+      <wsdlsoap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+
+      <wsdl:operation name="addTechInfo">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="addTechInfoRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="addTechInfoResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="updateTechInfo">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="updateTechInfoRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="updateTechInfoResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="updateTechCapacity">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="updateTechCapacityRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="updateTechCapacityResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="addGroupInfo">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="addGroupInfoRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="addGroupInfoResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="updateGroupInfo">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="updateGroupInfoRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="updateGroupInfoResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="addAreaInfo">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="addAreaInfoRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="addAreaInfoResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="updateAreaInfo">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="updateAreaInfoRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="updateAreaInfoResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="updateServicerInfo">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="updateServicerInfoRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="updateServicerInfoResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="updateDispatchOfficeInfo">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="updateDispatchOfficeInfoRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="updateDispatchOfficeInfoResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getCallInfo">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="getCallInfoRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="getCallInfoResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="updateCallInfo">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="updateCallInfoRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="updateCallInfoResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getCallNotes">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="getCallNotesRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="getCallNotesResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getCallAttributes">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="getCallAttributesRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="getCallAttributesResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="updatePostcode">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="updatePostcodeRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="updatePostcodeResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getProductCoverage">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="getProductCoverageRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="getProductCoverageResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getCallAddress">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="getCallAddressRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="getCallAddressResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getTestService">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="getTestServiceRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="getTestServiceResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+   </wsdl:binding>
+
+   <wsdl:service name="SPDService">
+
+      <wsdl:port binding="impl:SPDServiceSoapBinding" name="SPDService">
+
+         <wsdlsoap:address location="https://fssstag.servicepower.com/sms/services/SPDService"/>
+
+      </wsdl:port>
+
+   </wsdl:service>
+
+</wsdl:definitions>

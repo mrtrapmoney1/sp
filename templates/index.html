@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ServiceDispatch Data Viewer</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, #1a365d 0%, #2c5282 100%);
+            color: white;
+            padding: 30px 20px;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+
+        header p {
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+
+        .card h2 {
+            font-size: 1.2rem;
+            color: #2c5282;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #4a5568;
+            font-size: 0.9rem;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 10px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #4299e1;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #3182ce;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2c5282;
+        }
+
+        .btn-primary:disabled {
+            background: #a0aec0;
+            cursor: not-allowed;
+        }
+
+        .btn-group {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .status {
+            padding: 10px 15px;
+            border-radius: 6px;
+            font-weight: 500;
+            display: none;
+        }
+
+        .status.success {
+            background: #c6f6d5;
+            color: #276749;
+            display: block;
+        }
+
+        .status.error {
+            background: #fed7d7;
+            color: #c53030;
+            display: block;
+        }
+
+        .status.loading {
+            background: #e9d8fd;
+            color: #6b46c1;
+            display: block;
+        }
+
+        /* Data Table */
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        th {
+            background: #edf2f7;
+            color: #2d3748;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            white-space: nowrap;
+        }
+
+        tr:hover {
+            background: #f7fafc;
+        }
+
+        td {
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        td:hover {
+            overflow: visible;
+            white-space: normal;
+            word-break: break-word;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #718096;
+        }
+
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: #edf2f7;
+            padding: 15px;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .stat-card .number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2c5282;
+        }
+
+        .stat-card .label {
+            font-size: 0.85rem;
+            color: #718096;
+        }
+
+        /* Raw Data View */
+        .raw-data {
+            background: #1a202c;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 6px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.85rem;
+            max-height: 400px;
+            overflow: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+            display: none;
+        }
+
+        .toggle-raw {
+            background: #edf2f7;
+            color: #4a5568;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .toggle-raw:hover {
+            background: #e2e8f0;
+        }
+
+        /* Field selector */
+        .field-selector {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f7fafc;
+            border-radius: 6px;
+        }
+
+        .field-selector h3 {
+            font-size: 0.9rem;
+            color: #4a5568;
+            margin-bottom: 10px;
+        }
+
+        .field-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .field-chip {
+            padding: 5px 12px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .field-chip:hover {
+            border-color: #4299e1;
+        }
+
+        .field-chip.active {
+            background: #3182ce;
+            color: white;
+            border-color: #3182ce;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>ServiceDispatch Data Viewer</h1>
+            <p>Connect to ServiceDispatch API and visualize call data</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Connection Form -->
+        <div class="card">
+            <h2>Connection Settings</h2>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="user_id">User ID</label>
+                    <input type="text" id="user_id" maxlength="10" placeholder="Your user ID">
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" maxlength="10" placeholder="Your password">
+                </div>
+                <div class="form-group">
+                    <label for="servicer_account">Servicer Account (Optional)</label>
+                    <input type="text" id="servicer_account" maxlength="10" placeholder="Optional">
+                </div>
+                <div class="form-group">
+                    <label for="environment">Environment</label>
+                    <select id="environment">
+                        <option value="production_na">Production - North America</option>
+                        <option value="production_eu">Production - Europe</option>
+                        <option value="staging_na">Staging - North America</option>
+                        <option value="staging_eu">Staging - Europe</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="days">Date Range (Days)</label>
+                    <select id="days">
+                        <option value="1">Last 1 day</option>
+                        <option value="2" selected>Last 2 days</option>
+                    </select>
+                </div>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-primary" id="fetchBtn" onclick="fetchCalls()">Fetch Calls</button>
+                <div id="status" class="status"></div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div class="card" id="resultsCard" style="display: none;">
+            <h2>Call Data</h2>
+
+            <!-- Stats -->
+            <div class="stats-grid" id="statsGrid">
+                <div class="stat-card">
+                    <div class="number" id="totalCalls">0</div>
+                    <div class="label">Total Calls</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number" id="uniqueFields">0</div>
+                    <div class="label">Data Fields</div>
+                </div>
+            </div>
+
+            <!-- Field Selector -->
+            <div class="field-selector" id="fieldSelector">
+                <h3>Select columns to display:</h3>
+                <div class="field-chips" id="fieldChips"></div>
+            </div>
+
+            <!-- Data Table -->
+            <div class="table-container">
+                <table id="dataTable">
+                    <thead id="tableHead"></thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
+
+            <!-- Raw Data Toggle -->
+            <div style="margin-top: 20px;">
+                <button class="toggle-raw" onclick="toggleRawData()">Toggle Raw JSON</button>
+            </div>
+            <pre class="raw-data" id="rawData"></pre>
+        </div>
+    </div>
+
+    <script>
+        let allCalls = [];
+        let allFields = [];
+        let selectedFields = [];
+
+        // Default important fields to show
+        const priorityFields = [
+            'CallNumber', 'FSSCallId', 'CallStatus', 'ScheduleDate', 'ScheduleTime',
+            'ConsumerFirstName', 'ConsumerLastName', 'ConsumerAddress1', 'Postcode',
+            'Phone1', 'ProductDesc', 'BrandDesc', 'ProblemDesc', 'TechName'
+        ];
+
+        async function fetchCalls() {
+            const btn = document.getElementById('fetchBtn');
+            const status = document.getElementById('status');
+
+            const user_id = document.getElementById('user_id').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const servicer_account = document.getElementById('servicer_account').value.trim();
+            const environment = document.getElementById('environment').value;
+            const days = document.getElementById('days').value;
+
+            if (!user_id || !password) {
+                status.textContent = 'Please enter User ID and Password';
+                status.className = 'status error';
+                return;
+            }
+
+            btn.disabled = true;
+            status.textContent = 'Connecting to ServiceDispatch...';
+            status.className = 'status loading';
+
+            try {
+                const response = await fetch('/api/calls', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id, password, servicer_account, environment, days })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    status.textContent = data.message;
+                    status.className = 'status success';
+                    displayResults(data.calls);
+                } else {
+                    status.textContent = data.error || data.message || 'Error fetching data';
+                    status.className = 'status error';
+                    document.getElementById('resultsCard').style.display = 'none';
+                }
+            } catch (err) {
+                status.textContent = 'Connection error: ' + err.message;
+                status.className = 'status error';
+            }
+
+            btn.disabled = false;
+        }
+
+        function displayResults(calls) {
+            allCalls = calls;
+            const resultsCard = document.getElementById('resultsCard');
+
+            if (calls.length === 0) {
+                resultsCard.style.display = 'block';
+                document.getElementById('totalCalls').textContent = '0';
+                document.getElementById('uniqueFields').textContent = '0';
+                document.getElementById('tableBody').innerHTML = '<tr><td colspan="100" class="no-data">No calls found in the selected date range</td></tr>';
+                document.getElementById('fieldChips').innerHTML = '';
+                document.getElementById('rawData').textContent = '[]';
+                return;
+            }
+
+            // Collect all unique fields
+            const fieldSet = new Set();
+            calls.forEach(call => {
+                Object.keys(call).forEach(key => fieldSet.add(key));
+            });
+            allFields = Array.from(fieldSet).sort();
+
+            // Select default fields (priority fields that exist in data)
+            selectedFields = priorityFields.filter(f => allFields.includes(f));
+            if (selectedFields.length === 0) {
+                selectedFields = allFields.slice(0, 8);
+            }
+
+            // Update stats
+            document.getElementById('totalCalls').textContent = calls.length;
+            document.getElementById('uniqueFields').textContent = allFields.length;
+
+            // Build field chips
+            buildFieldChips();
+
+            // Render table
+            renderTable();
+
+            // Raw data
+            document.getElementById('rawData').textContent = JSON.stringify(calls, null, 2);
+
+            resultsCard.style.display = 'block';
+        }
+
+        function buildFieldChips() {
+            const container = document.getElementById('fieldChips');
+            container.innerHTML = '';
+
+            allFields.forEach(field => {
+                const chip = document.createElement('span');
+                chip.className = 'field-chip' + (selectedFields.includes(field) ? ' active' : '');
+                chip.textContent = field;
+                chip.onclick = () => toggleField(field, chip);
+                container.appendChild(chip);
+            });
+        }
+
+        function toggleField(field, chip) {
+            if (selectedFields.includes(field)) {
+                selectedFields = selectedFields.filter(f => f !== field);
+                chip.classList.remove('active');
+            } else {
+                selectedFields.push(field);
+                chip.classList.add('active');
+            }
+            renderTable();
+        }
+
+        function renderTable() {
+            const thead = document.getElementById('tableHead');
+            const tbody = document.getElementById('tableBody');
+
+            // Header
+            thead.innerHTML = '<tr>' + selectedFields.map(f => `<th>${f}</th>`).join('') + '</tr>';
+
+            // Body
+            tbody.innerHTML = allCalls.map(call => {
+                return '<tr>' + selectedFields.map(f => `<td title="${call[f] || ''}">${call[f] || '-'}</td>`).join('') + '</tr>';
+            }).join('');
+        }
+
+        function toggleRawData() {
+            const rawData = document.getElementById('rawData');
+            rawData.style.display = rawData.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // Allow Enter key to submit
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                fetchCalls();
+            }
+        });
+    </script>
+</body>
+</html>

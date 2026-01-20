@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(chmod:*)",
+      "Bash(ls:*)",
+      "Bash(grep:*)",
+      "Bash(gh --version:*)",
+      "Bash(git add:*)"
+    ]
+  }
+}
