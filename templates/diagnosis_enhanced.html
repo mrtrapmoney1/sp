@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Diagnosis - ServiceDispatch</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Consolas, monospace;
+            background: #0d1117;
+            color: #c9d1d9;
+            line-height: 1.6;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1a365d 0%, #2c5282 100%);
+            color: white;
+            padding: 15px 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        .header-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .nav {
+            display: flex;
+            gap: 5px;
+        }
+
+        .nav a {
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: background 0.2s;
+            font-weight: 500;
+        }
+
+        .nav a:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .nav a.active {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .panel {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .panel h2 {
+            font-size: 1.1rem;
+            color: #58a6ff;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #21262d;
+            padding-bottom: 10px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #8b949e;
+            font-size: 0.9rem;
+        }
+
+        .form-group input {
+            padding: 10px 12px;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            background: #0d1117;
+            color: #c9d1d9;
+            font-size: 0.95rem;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #58a6ff;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #238636;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2ea043;
+        }
+
+        .status {
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .status.success {
+            background: #238636;
+            color: white;
+            display: block;
+        }
+
+        .status.error {
+            background: #da3633;
+            color: white;
+            display: block;
+        }
+
+        .status.loading {
+            background: #1f6feb;
+            color: white;
+            display: block;
+        }
+
+        .recommendations-grid {
+            display: grid;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .recommendation-card {
+            background: #0d1117;
+            border: 2px solid #238636;
+            border-radius: 6px;
+            padding: 15px;
+            transition: all 0.2s;
+        }
+
+        .recommendation-card:hover {
+            border-color: #2ea043;
+            transform: translateY(-2px);
+        }
+
+        .recommendation-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #21262d;
+        }
+
+        .part-number {
+            color: #58a6ff;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .confidence-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .confidence-high { background: #238636; color: white; }
+        .confidence-medium { background: #bb8009; color: white; }
+        .confidence-low { background: #6e7681; color: white; }
+
+        .recommendation-details {
+            font-size: 0.9rem;
+        }
+
+        .detail-row {
+            display: flex;
+            margin-bottom: 5px;
+        }
+
+        .detail-label {
+            color: #8b949e;
+            width: 140px;
+            flex-shrink: 0;
+        }
+
+        .detail-value {
+            color: #c9d1d9;
+        }
+
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .stat-box {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #58a6ff;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: #8b949e;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            color: #8b949e;
+        }
+
+        .info-box {
+            background: #1f2937;
+            border-left: 4px solid #58a6ff;
+            padding: 12px 15px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .footer {
+            background: #161b22;
+            border-top: 1px solid #30363d;
+            padding: 20px;
+            text-align: center;
+            color: #8b949e;
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <h1>Smart Diagnosis Helper</h1>
+            <nav class="nav">
+                <a href="/dashboard">Dashboard</a>
+                <a href="/tickets">Tickets</a>
+                <a href="/map">Map</a>
+                <a href="/analytics">Analytics</a>
+                <a href="/diagnosis" class="active">Diagnosis</a>
+                <a href="/parts">Parts</a>
+                <a href="#" onclick="logout(); return false;" style="color: #fc8181;">Logout</a>
+            </nav>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Smart Search Panel -->
+        <div class="panel">
+            <h2>🔍 Intelligent Parts Recommendation</h2>
+            <div class="info-box">
+                AI-powered recommendations based on historical repair data. Enter appliance details and problem to get suggested parts with success rates.
+            </div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="make">Make/Brand</label>
+                    <input type="text" id="make" placeholder="e.g., Whirlpool, GE, Samsung">
+                </div>
+                <div class="form-group">
+                    <label for="model">Model Number</label>
+                    <input type="text" id="model" placeholder="e.g., WTW5000DW">
+                </div>
+                <div class="form-group">
+                    <label for="productType">Product Type</label>
+                    <input type="text" id="productType" placeholder="e.g., Washer, Dryer">
+                </div>
+                <div class="form-group">
+                    <label for="problem">Problem/Symptom</label>
+                    <input type="text" id="problem" placeholder="e.g., not heating, won't drain">
+                </div>
+            </div>
+            <button class="btn btn-primary" onclick="getRecommendations()">Get Recommendations</button>
+            <div id="recStatus" class="status"></div>
+        </div>
+
+        <!-- Recommendations Results -->
+        <div class="panel" id="recommendationsPanel" style="display: none;">
+            <h2>💡 Recommended Parts</h2>
+            <div id="confidenceInfo" class="info-box" style="display: none;"></div>
+            <div class="recommendations-grid" id="recommendationsContainer"></div>
+            <div id="noRecommendations" class="no-results" style="display: none;">
+                <p>No recommendations found. Try different search criteria or broader terms.</p>
+            </div>
+        </div>
+
+        <!-- Analytics Panel -->
+        <div class="panel" id="analyticsPanel" style="display: none;">
+            <h2>📊 Historical Data Analytics</h2>
+            <div class="analytics-grid" id="analyticsContainer"></div>
+        </div>
+
+        <!-- Basic Search Panel -->
+        <div class="panel">
+            <h2>🔎 Search Parts History</h2>
+            <p style="color: #8b949e; margin-bottom: 15px; font-size: 0.9rem;">
+                Quick search across all historical parts records.
+            </p>
+            <input type="text" id="searchBox"
+                   style="width: 100%; padding: 12px; background: #0d1117; border: 1px solid #30363d; border-radius: 6px; color: #c9d1d9; margin-bottom: 10px;"
+                   placeholder="Search by part number, problem description, make, model..."
+                   onkeypress="if(event.key==='Enter') searchParts()">
+            <button class="btn btn-primary" onclick="searchParts()">Search</button>
+            <div id="status" class="status"></div>
+        </div>
+
+        <!-- Search Results -->
+        <div id="resultsPanel" class="panel" style="display: none;">
+            <h2>Search Results (<span id="resultCount">0</span>)</h2>
+            <div id="resultsContainer" class="recommendations-grid"></div>
+            <div id="noResults" class="no-results" style="display: none;">
+                <p>No matching parts found.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Smart Diagnosis Helper | Powered by Pandas & Machine Learning</p>
+    </div>
+
+    <script>
+        async function logout() {
+            if (!confirm('Are you sure you want to logout?')) return;
+            try {
+                await fetch('/api/logout', { method: 'POST' });
+                window.location.href = '/';
+            } catch (err) {
+                console.error('Logout error:', err);
+                window.location.href = '/';
+            }
+        }
+
+        async function getRecommendations() {
+            const make = document.getElementById('make').value.trim();
+            const model = document.getElementById('model').value.trim();
+            const productType = document.getElementById('productType').value.trim();
+            const problem = document.getElementById('problem').value.trim();
+
+            const status = document.getElementById('recStatus');
+            const panel = document.getElementById('recommendationsPanel');
+            const container = document.getElementById('recommendationsContainer');
+            const noResults = document.getElementById('noRecommendations');
+            const confidenceInfo = document.getElementById('confidenceInfo');
+
+            if (!make && !model && !problem) {
+                status.textContent = 'Please enter at least one search criterion';
+                status.className = 'status error';
+                return;
+            }
+
+            status.textContent = 'Analyzing historical data...';
+            status.className = 'status loading';
+
+            try {
+                const response = await fetch('/api/recommendations', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ make, model, product_type: productType, problem })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    if (data.recommendations && data.recommendations.length > 0) {
+                        status.textContent = `Found ${data.recommendations.length} recommendations (Confidence: ${data.confidence})`;
+                        status.className = 'status success';
+
+                        // Show confidence info
+                        confidenceInfo.style.display = 'block';
+                        confidenceInfo.innerHTML = `
+                            <strong>Analysis:</strong> Based on ${data.total_matches} similar cases.
+                            Confidence: <span class="confidence-badge confidence-${data.confidence}">${data.confidence.toUpperCase()}</span>
+                            ${data.filters_applied ? `<br>Filters: ${data.filters_applied.join(', ')}` : ''}
+                        `;
+
+                        displayRecommendations(data.recommendations, data.confidence);
+                        panel.style.display = 'block';
+                        noResults.style.display = 'none';
+                    } else {
+                        status.textContent = data.message || 'No recommendations found';
+                        status.className = 'status error';
+                        panel.style.display = 'block';
+                        container.innerHTML = '';
+                        noResults.style.display = 'block';
+                        confidenceInfo.style.display = 'none';
+                    }
+                } else {
+                    status.textContent = 'Error: ' + (data.error || 'Search failed');
+                    status.className = 'status error';
+                }
+            } catch (err) {
+                status.textContent = 'Connection error: ' + err.message;
+                status.className = 'status error';
+            }
+        }
+
+        function displayRecommendations(recommendations, overallConfidence) {
+            const container = document.getElementById('recommendationsContainer');
+
+            container.innerHTML = recommendations.map(rec => {
+                return `
+                    <div class="recommendation-card">
+                        <div class="recommendation-header">
+                            <div class="part-number">${rec.part_number}</div>
+                            <div class="confidence-badge confidence-${overallConfidence}">
+                                ${rec.success_rate} success rate
+                            </div>
+                        </div>
+                        <div class="recommendation-details">
+                            <div class="detail-row">
+                                <span class="detail-label">Description:</span>
+                                <span class="detail-value">${rec.description || 'N/A'}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Used in repairs:</span>
+                                <span class="detail-value">${rec.frequency} times</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Sample size:</span>
+                                <span class="detail-value">${rec.sample_size} similar cases</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function searchParts() {
+            const searchTerm = document.getElementById('searchBox').value.trim();
+            const status = document.getElementById('status');
+            const resultsPanel = document.getElementById('resultsPanel');
+            const resultsContainer = document.getElementById('resultsContainer');
+            const noResults = document.getElementById('noResults');
+
+            if (!searchTerm) {
+                status.textContent = 'Please enter a search term';
+                status.className = 'status error';
+                return;
+            }
+
+            status.textContent = 'Searching database...';
+            status.className = 'status loading';
+
+            try {
+                const response = await fetch('/api/parts/history', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ search: searchTerm })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    status.textContent = `Found ${data.count} matching records (Total: ${data.total_records})`;
+                    status.className = 'status success';
+
+                    if (data.parts.length === 0) {
+                        resultsPanel.style.display = 'block';
+                        resultsContainer.innerHTML = '';
+                        noResults.style.display = 'block';
+                        document.getElementById('resultCount').textContent = '0';
+                    } else {
+                        displaySearchResults(data.parts);
+                        noResults.style.display = 'none';
+                    }
+                } else {
+                    status.textContent = 'Error: ' + (data.error || 'Search failed');
+                    status.className = 'status error';
+                }
+            } catch (err) {
+                status.textContent = 'Connection error: ' + err.message;
+                status.className = 'status error';
+            }
+        }
+
+        function displaySearchResults(parts) {
+            const resultsPanel = document.getElementById('resultsPanel');
+            const resultsContainer = document.getElementById('resultsContainer');
+            const resultCount = document.getElementById('resultCount');
+
+            resultsPanel.style.display = 'block';
+            resultCount.textContent = parts.length;
+
+            resultsContainer.innerHTML = parts.map(part => {
+                const partNum = part.P1 || part.P2 || part.P3 || part.PART_NUM || 'N/A';
+                const partDesc = part.PD1 || part.PD2 || part.PD3 || part.PART_DESC || '';
+                const invoice = part.INVOICE || '';
+                const servicereq = part.SERVICEREQ || part.SYMPT || '';
+                const make = part.MAKE || '';
+                const model = part.MODEL || '';
+
+                return `
+                    <div class="recommendation-card" style="border-color: #30363d;">
+                        <div class="recommendation-header">
+                            <div class="part-number">${partNum}</div>
+                            <div style="color: #8b949e; font-size: 0.85rem;">Invoice: ${invoice}</div>
+                        </div>
+                        <div class="recommendation-details">
+                            ${partDesc ? `<div class="detail-row"><span class="detail-label">Description:</span><span class="detail-value">${partDesc}</span></div>` : ''}
+                            ${make ? `<div class="detail-row"><span class="detail-label">Make:</span><span class="detail-value">${make}</span></div>` : ''}
+                            ${model ? `<div class="detail-row"><span class="detail-label">Model:</span><span class="detail-value">${model}</span></div>` : ''}
+                            ${servicereq ? `<div class="detail-row"><span class="detail-label">Problem:</span><span class="detail-value">${servicereq}</span></div>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+    </script>
+</body>
+</html>

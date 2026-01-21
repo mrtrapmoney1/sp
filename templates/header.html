@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ServiceDispatch{% endblock %} - Metro TV & Appliance</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        body.light-mode {
+            background: #ffffff;
+            color: #1a202c;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1a365d 0%, #2c5282 100%);
+            color: white;
+            padding: 15px 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .nav {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        .nav a {
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: background 0.2s;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .nav a:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .nav a.active {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .theme-toggle {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .theme-toggle:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        {% block extra_styles %}{% endblock %}
+    </style>
+    {% block head_extra %}{% endblock %}
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <h1>{% block header_title %}ServiceDispatch{% endblock %}</h1>
+            <nav class="nav">
+                <a href="/dashboard" {% if active_page == 'dashboard' %}class="active"{% endif %}>Dashboard</a>
+                <a href="/tickets" {% if active_page == 'tickets' %}class="active"{% endif %}>Tickets</a>
+                <a href="/map" {% if active_page == 'map' %}class="active"{% endif %}>Map</a>
+                <a href="/analytics" {% if active_page == 'analytics' %}class="active"{% endif %}>Analytics</a>
+                <a href="/diagnosis" {% if active_page == 'diagnosis' %}class="active"{% endif %}>Diagnosis</a>
+                <a href="/parts" {% if active_page == 'parts' %}class="active"{% endif %}>Parts</a>
+                <button class="theme-toggle" onclick="toggleTheme()">🌓 Theme</button>
+                <a href="#" onclick="logout(); return false;" style="color: #fc8181;">Logout</a>
+            </nav>
+        </div>
+    </div>
+
+    {% block content %}{% endblock %}
+
+    <script>
+        // Theme management
+        function toggleTheme() {
+            const body = document.body;
+            if (body.classList.contains('light-mode')) {
+                body.classList.remove('light-mode');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                body.classList.add('light-mode');
+                localStorage.setItem('theme', 'light');
+            }
+        }
+
+        // Load saved theme
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'light') {
+            document.body.classList.add('light-mode');
+        }
+
+        // Logout function
+        async function logout() {
+            if (!confirm('Are you sure you want to logout?')) return;
+            try {
+                await fetch('/api/logout', { method: 'POST' });
+                window.location.href = '/';
+            } catch (err) {
+                console.error('Logout error:', err);
+                window.location.href = '/';
+            }
+        }
+
+        {% block extra_scripts %}{% endblock %}
+    </script>
+</body>
+</html>

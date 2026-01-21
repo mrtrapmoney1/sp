@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticket Creator - ServiceDispatch</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Consolas, monospace;
+            background: #0d1117;
+            color: #c9d1d9;
+            line-height: 1.6;
+        }
+
+        /* Header Navigation */
+        .header {
+            background: linear-gradient(135deg, #1a365d 0%, #2c5282 100%);
+            color: white;
+            padding: 15px 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        .header-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .nav {
+            display: flex;
+            gap: 5px;
+        }
+
+        .nav a {
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: background 0.2s;
+            font-weight: 500;
+        }
+
+        .nav a:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .nav a.active {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Connection Panel */
+        .panel {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .panel h2 {
+            font-size: 1.1rem;
+            color: #58a6ff;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #21262d;
+            padding-bottom: 10px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #8b949e;
+            font-size: 0.9rem;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 8px 12px;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            background: #0d1117;
+            color: #c9d1d9;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #58a6ff;
+            box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.1);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #238636;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2ea043;
+        }
+
+        .btn-secondary {
+            background: #21262d;
+            color: #c9d1d9;
+            border: 1px solid #30363d;
+        }
+
+        .btn-secondary:hover {
+            background: #30363d;
+        }
+
+        .btn-export {
+            background: #1f6feb;
+            color: white;
+        }
+
+        .btn-export:hover {
+            background: #388bfd;
+        }
+
+        .btn:disabled {
+            background: #21262d;
+            color: #484f58;
+            cursor: not-allowed;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .status {
+            padding: 8px 15px;
+            border-radius: 6px;
+            font-weight: 500;
+            display: none;
+        }
+
+        .status.success {
+            background: #238636;
+            color: white;
+            display: inline-block;
+        }
+
+        .status.error {
+            background: #da3633;
+            color: white;
+            display: inline-block;
+        }
+
+        .status.loading {
+            background: #1f6feb;
+            color: white;
+            display: inline-block;
+        }
+
+        /* Filters */
+        .filters {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .filter-select {
+            padding: 8px 12px;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            background: #0d1117;
+            color: #c9d1d9;
+            font-size: 0.9rem;
+        }
+
+        /* Ticket List - Vertical Layout */
+        .tickets-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 15px;
+        }
+
+        .ticket-card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 15px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.85rem;
+            position: relative;
+            transition: border-color 0.2s;
+        }
+
+        .ticket-card:hover {
+            border-color: #58a6ff;
+        }
+
+        .ticket-card.selected {
+            border-color: #238636;
+            background: #0d1a14;
+        }
+
+        .ticket-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #21262d;
+        }
+
+        .ticket-header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .ticket-checkbox {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .ticket-invoice-input {
+            width: 80px;
+            padding: 4px 8px;
+            border: 1px solid #30363d;
+            border-radius: 4px;
+            background: #0d1117;
+            color: #c9d1d9;
+            font-size: 0.85rem;
+            text-align: center;
+        }
+
+        /* Light mode overrides */
+        body.light-mode {
+            background: #f5f7fa;
+            color: #333;
+        }
+
+        body.light-mode .panel,
+        body.light-mode .ticket-card,
+        body.light-mode .selection-summary {
+            background: white;
+            border-color: #e2e8f0;
+            color: #333;
+        }
+
+        body.light-mode .panel h2 {
+            color: #2c5282;
+            border-bottom-color: #e2e8f0;
+        }
+
+        body.light-mode .form-group input,
+        body.light-mode .form-group select,
+        body.light-mode .filter-select,
+        body.light-mode .ticket-invoice-input {
+            background: #f5f7fa;
+            border-color: #e2e8f0;
+            color: #333;
+        }
+
+        body.light-mode .ticket-card {
+            background: #fafafa;
+        }
+
+        body.light-mode .ticket-card:hover {
+            border-color: #3182ce;
+        }
+
+        body.light-mode .ticket-card.selected {
+            border-color: #38a169;
+            background: #f0fff4;
+        }
+
+        body.light-mode .field-label {
+            color: #2c5282;
+        }
+
+        body.light-mode .field-value {
+            color: #2d3748;
+        }
+
+        body.light-mode .selection-info {
+            color: #4a5568;
+        }
+
+        body.light-mode .selection-info strong {
+            color: #2c5282;
+        }
+
+        body.light-mode .footer {
+            background: white;
+            border-top-color: #e2e8f0;
+            color: #718096;
+        }
+
+        body.light-mode .copy-btn,
+        body.light-mode .btn-secondary {
+            background: #edf2f7;
+            color: #2d3748;
+            border-color: #e2e8f0;
+        }
+
+        body.light-mode .copy-btn:hover,
+        body.light-mode .btn-secondary:hover {
+            background: #e2e8f0;
+        }
+
+        body.light-mode .warranty-IW,
+        body.light-mode .warranty-SC,
+        body.light-mode .warranty-OTHER {
+            opacity: 0.9;
+        }
+
+        /* Theme toggle */
+        .theme-toggle {
+            background: #21262d;
+            border: 1px solid #30363d;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            color: #c9d1d9;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .theme-toggle:hover {
+            background: #30363d;
+        }
+
+        body.light-mode .theme-toggle {
+            background: #edf2f7;
+            border-color: #e2e8f0;
+            color: #2d3748;
+        }
+
+        body.light-mode .theme-toggle:hover {
+            background: #e2e8f0;
+        }
+
+        .ticket-field {
+            display: flex;
+            margin-bottom: 3px;
+        }
+
+        .field-label {
+            color: #58a6ff;
+            width: 120px;
+            flex-shrink: 0;
+        }
+
+        .field-value {
+            color: #c9d1d9;
+            word-break: break-word;
+        }
+
+        .warranty-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .warranty-IW { background: #1f6feb; color: white; }
+        .warranty-SC { background: #238636; color: white; }
+        .warranty-OTHER { background: #6e7681; color: white; }
+
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 4px 10px;
+            font-size: 0.75rem;
+            background: #21262d;
+            color: #8b949e;
+            border: 1px solid #30363d;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .copy-btn:hover {
+            background: #30363d;
+            color: #c9d1d9;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 60px 20px;
+            color: #8b949e;
+        }
+
+        .selection-summary {
+            background: #161b22;
+            border: 1px solid #30363d;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .selection-info {
+            color: #8b949e;
+        }
+
+        .selection-info strong {
+            color: #58a6ff;
+            font-size: 1.2rem;
+        }
+
+        /* Footer */
+        .footer {
+            background: #161b22;
+            border-top: 1px solid #30363d;
+            padding: 20px;
+            text-align: center;
+            color: #8b949e;
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <h1>ServiceDispatch Ticket Creator</h1>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <button class="theme-toggle" onclick="toggleTheme()">
+                    <span id="themeIcon">🌙</span> <span id="themeText">Dark</span>
+                </button>
+                <nav class="nav">
+                    <a href="/dashboard">Dashboard</a>
+                    <a href="/tickets" class="active">Tickets</a>
+                    <a href="/map">Map</a>
+                    <a href="/analytics">Analytics</a>
+                    <a href="#" onclick="logout(); return false;" style="color: #fc8181;">Logout</a>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Connection Panel -->
+        <div class="panel">
+            <h2>Fetch Settings</h2>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="days">Date Range</label>
+                    <select id="days" onchange="toggleCustomDates()">
+                        <option value="1">Last 1 day</option>
+                        <option value="2" selected>Last 2 days</option>
+                        <option value="5">Last 5 days</option>
+                        <option value="7">Last 7 days</option>
+                        <option value="14">Last 14 days</option>
+                        <option value="30">Last 30 days</option>
+                        <option value="60">Last 60 days</option>
+                        <option value="90">Last 90 days</option>
+                        <option value="custom">Custom Range</option>
+                    </select>
+                </div>
+            </div>
+            <div id="customDateRange" style="display: none; margin-top: 15px;">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="startDate">Start Date</label>
+                        <input type="date" id="startDate">
+                    </div>
+                    <div class="form-group">
+                        <label for="endDate">End Date</label>
+                        <input type="date" id="endDate">
+                    </div>
+                </div>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-primary" id="fetchBtn" onclick="fetchCalls()">Fetch Calls</button>
+                <div id="status" class="status"></div>
+            </div>
+        </div>
+
+        <!-- Filters Panel -->
+        <div class="panel" id="filtersPanel" style="display: none;">
+            <h2>Filters</h2>
+            <div class="filters">
+                <select class="filter-select" id="warrantyFilter" onchange="filterTickets()">
+                    <option value="">All Warranty Companies</option>
+                </select>
+                <select class="filter-select" id="brandFilter" onchange="filterTickets()">
+                    <option value="">All Brands</option>
+                </select>
+                <select class="filter-select" id="productFilter" onchange="filterTickets()">
+                    <option value="">All Product Types</option>
+                </select>
+                <select class="filter-select" id="statusFilter" onchange="filterTickets()">
+                    <option value="">All Status</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- SMS Template Panel -->
+        <div class="panel" id="smsPanel" style="display: none;">
+            <h2>SMS Customer Notification</h2>
+            <p style="color: #8b949e; margin-bottom: 10px; font-size: 0.9rem;">
+                Select a ticket below to generate personalized SMS template
+            </p>
+            <div id="smsTemplateArea" style="display: none;">
+                <textarea id="smsTemplate" readonly style="width: 100%; min-height: 200px; padding: 12px; border: 1px solid #30363d; border-radius: 6px; background: #0d1117; color: #c9d1d9; font-family: monospace; font-size: 0.85rem; resize: vertical;"></textarea>
+                <div class="btn-group" style="margin-top: 10px;">
+                    <button class="btn btn-secondary" onclick="copySMS()">Copy SMS</button>
+                    <button class="btn btn-secondary" onclick="updateStatusWaiting()">Set Status: Waiting on Customer</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Selection Summary -->
+        <div class="selection-summary" id="selectionSummary" style="display: none;">
+            <div class="selection-info">
+                <strong id="selectedCount">0</strong> tickets selected of <span id="totalCount">0</span>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-secondary" onclick="selectAll()">Select All</button>
+                <button class="btn btn-secondary" onclick="deselectAll()">Deselect All</button>
+                <button class="btn btn-export" onclick="exportDBF()" id="exportBtn" disabled>Export DBF</button>
+            </div>
+        </div>
+
+        <!-- Tickets Container -->
+        <div id="ticketsContainer" class="tickets-container"></div>
+        <div id="noData" class="no-data" style="display: none;">
+            <p>No tickets found. Fetch calls to get started.</p>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>ServiceDispatch Ticket Creator | Lotus Integration System</p>
+    </div>
+
+    <script>
+        let allCalls = [];
+        let filteredCalls = [];
+        let selectedTicketForSMS = null;
+
+        // Warranty company mapping
+        const WARRANTY_MAP = {
+            '6RW97': 'GE Warranty',
+            '10826': 'Electrolux',
+            'MET11106': 'SquareTrade',
+            'METTVAU': 'Assurant'
+        };
+
+        // Theme toggle
+        function toggleTheme() {
+            const body = document.body;
+            const icon = document.getElementById('themeIcon');
+            const text = document.getElementById('themeText');
+
+            if (body.classList.contains('light-mode')) {
+                body.classList.remove('light-mode');
+                icon.textContent = '🌙';
+                text.textContent = 'Dark';
+                localStorage.setItem('theme', 'dark');
+            } else {
+                body.classList.add('light-mode');
+                icon.textContent = '☀️';
+                text.textContent = 'Light';
+                localStorage.setItem('theme', 'light');
+            }
+        }
+
+        // Load saved theme
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'light') {
+                document.body.classList.add('light-mode');
+                document.getElementById('themeIcon').textContent = '☀️';
+                document.getElementById('themeText').textContent = 'Light';
+            }
+        }
+
+        // Load saved credentials
+        function loadCredentials() {
+            const saved = sessionStorage.getItem('sp_credentials');
+            if (saved) {
+                const creds = JSON.parse(saved);
+                if (creds.password) document.getElementById('password').value = creds.password;
+                if (creds.environment) document.getElementById('environment').value = creds.environment;
+            }
+        }
+
+        // Save credentials
+        function saveCredentials() {
+            const creds = {
+                password: document.getElementById('password').value,
+                environment: document.getElementById('environment').value
+            };
+            sessionStorage.setItem('sp_credentials', JSON.stringify(creds));
+        }
+
+        // Custom date range toggle
+        function toggleCustomDates() {
+            const days = document.getElementById('days').value;
+            const customDiv = document.getElementById('customDateRange');
+            if (days === 'custom') {
+                customDiv.style.display = 'block';
+                // Set default dates
+                const end = new Date();
+                const start = new Date();
+                start.setDate(start.getDate() - 7);
+                document.getElementById('endDate').valueAsDate = end;
+                document.getElementById('startDate').valueAsDate = start;
+            } else {
+                customDiv.style.display = 'none';
+            }
+        }
+
+        // Logout
+        async function logout() {
+            if (!confirm('Are you sure you want to logout?')) return;
+
+            try {
+                await fetch('/api/logout', { method: 'POST' });
+                window.location.href = '/';
+            } catch (err) {
+                console.error('Logout error:', err);
+                window.location.href = '/';
+            }
+        }
+
+        // Initialize on load
+        window.addEventListener('load', () => {
+            loadTheme();
+            loadCredentials();
+        });
+
+        async function fetchCalls() {
+            const btn = document.getElementById('fetchBtn');
+            const status = document.getElementById('status');
+            const daysSelect = document.getElementById('days').value;
+
+            let requestData = {};
+
+            // Handle custom date range
+            if (daysSelect === 'custom') {
+                const startDate = document.getElementById('startDate').value;
+                const endDate = document.getElementById('endDate').value;
+                if (!startDate || !endDate) {
+                    status.textContent = 'Please select start and end dates';
+                    status.className = 'status error';
+                    return;
+                }
+                requestData.from_date = startDate;
+                requestData.to_date = endDate;
+            } else {
+                requestData.days = parseInt(daysSelect);
+            }
+
+            btn.disabled = true;
+            status.textContent = 'Fetching calls from ServiceDispatch...';
+            status.className = 'status loading';
+
+            try {
+                const response = await fetch('/api/calls', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestData)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    status.textContent = data.message;
+                    status.className = 'status success';
+                    allCalls = data.calls;
+                    filteredCalls = [...allCalls];
+                    displayTickets();
+                    buildFilters();
+                    document.getElementById('smsPanel').style.display = 'block';
+                } else {
+                    status.textContent = data.error || data.message || 'Error fetching data';
+                    status.className = 'status error';
+                }
+            } catch (err) {
+                status.textContent = 'Connection error: ' + err.message;
+                status.className = 'status error';
+            }
+
+            btn.disabled = false;
+        }
+
+        function getWarrantyCompany(call) {
+            const serviceCenter = call.ServiceCenter || '';
+            return WARRANTY_MAP[serviceCenter] || 'Unknown';
+        }
+
+        function buildFilters() {
+            const warranties = new Set();
+            const brands = new Set();
+            const products = new Set();
+            const statuses = new Set();
+
+            allCalls.forEach(call => {
+                warranties.add(getWarrantyCompany(call));
+                if (call.ProductInfo_SPBrandDesc) brands.add(call.ProductInfo_SPBrandDesc);
+                if (call.ProductInfo_SPProductDesc) products.add(call.ProductInfo_SPProductDesc);
+                if (call.CallStatus) statuses.add(call.CallStatus);
+            });
+
+            populateFilter('warrantyFilter', Array.from(warranties).sort());
+            populateFilter('brandFilter', Array.from(brands).sort());
+            populateFilter('productFilter', Array.from(products).sort());
+            populateFilter('statusFilter', Array.from(statuses).sort());
+
+            document.getElementById('filtersPanel').style.display = 'block';
+        }
+
+        function populateFilter(filterId, options) {
+            const select = document.getElementById(filterId);
+            const currentValue = select.value;
+            const filterName = filterId.replace('Filter', '');
+            const displayName = filterName === 'warranty' ? 'Warranty Companies' :
+                              filterName === 'brand' ? 'Brands' :
+                              filterName === 'product' ? 'Product Types' : 'Status';
+            select.innerHTML = `<option value="">All ${displayName}</option>`;
+            options.forEach(opt => {
+                const option = document.createElement('option');
+                option.value = opt;
+                option.textContent = opt;
+                select.appendChild(option);
+            });
+            select.value = currentValue;
+        }
+
+        function filterTickets() {
+            const warranty = document.getElementById('warrantyFilter').value;
+            const brand = document.getElementById('brandFilter').value;
+            const product = document.getElementById('productFilter').value;
+            const status = document.getElementById('statusFilter').value;
+
+            filteredCalls = allCalls.filter(call => {
+                if (warranty && getWarrantyCompany(call) !== warranty) return false;
+                if (brand && call.ProductInfo_SPBrandDesc !== brand) return false;
+                if (product && call.ProductInfo_SPProductDesc !== product) return false;
+                if (status && call.CallStatus !== status) return false;
+                return true;
+            });
+
+            displayTickets();
+        }
+
+        function displayTickets() {
+            const container = document.getElementById('ticketsContainer');
+            const noData = document.getElementById('noData');
+            const summary = document.getElementById('selectionSummary');
+
+            if (filteredCalls.length === 0) {
+                container.innerHTML = '';
+                noData.style.display = 'block';
+                summary.style.display = 'none';
+                return;
+            }
+
+            noData.style.display = 'none';
+            summary.style.display = 'flex';
+            document.getElementById('totalCount').textContent = filteredCalls.length;
+
+            container.innerHTML = filteredCalls.map((call, index) => {
+                const warrantyCompany = getWarrantyCompany(call);
+                const warrantyClass = warrantyCompany.includes('GE') ? 'IW' :
+                                     warrantyCompany.includes('SquareTrade') ? 'SC' : 'OTHER';
+
+                return `
+                    <div class="ticket-card" id="ticket-${index}" onclick="selectTicketForSMS(${index}, event)">
+                        <div class="ticket-header">
+                            <div class="ticket-header-left">
+                                <input type="checkbox" class="ticket-checkbox" id="check-${index}" onchange="updateSelection()" onclick="event.stopPropagation()">
+                                <span class="warranty-badge warranty-${warrantyClass}">${warrantyCompany}</span>
+                                <input type="text" class="ticket-invoice-input" id="invoice-${index}" placeholder="Invoice" maxlength="5" onclick="event.stopPropagation()">
+                            </div>
+                            <button class="copy-btn" onclick="copyTicket(${index}); event.stopPropagation()">Copy</button>
+                        </div>
+                        <div class="ticket-field"><span class="field-label">INVOICE:</span><span class="field-value" id="inv-display-${index}">_____</span></div>
+                        <div class="ticket-field"><span class="field-label">LASTNAME:</span><span class="field-value">${call.ConsumerInfo_ConsumerLastName || ''}</span></div>
+                        <div class="ticket-field"><span class="field-label">FIRSTNAME:</span><span class="field-value">${call.ConsumerInfo_ConsumerFirstName || ''}</span></div>
+                        <div class="ticket-field"><span class="field-label">ADDRESS:</span><span class="field-value">${call.ConsumerInfo_ConsumerAddress1 || ''}</span></div>
+                        <div class="ticket-field"><span class="field-label">CITY:</span><span class="field-value">${call.ConsumerInfo_PostcodeLevel3 || ''}</span></div>
+                        <div class="ticket-field"><span class="field-label">STATE:</span><span class="field-value">${call.ConsumerInfo_PostcodeLevel1 || ''}</span></div>
+                        <div class="ticket-field"><span class="field-label">ZIP:</span><span class="field-value">${(call.ConsumerInfo_Postcode || '').split('-')[0]}</span></div>
+                        <div class="ticket-field"><span class="field-label">PHONE:</span><span class="field-value">${call.ConsumerInfo_Phone1 || ''}</span></div>
+                        <div class="ticket-field"><span class="field-label">PHONE2:</span><span class="field-value">${call.ConsumerInfo_Phone2 !== '0' ? call.ConsumerInfo_Phone2 : ''}</span></div>
+                        <div class="ticket-field"><span class="field-label">LOCATION:</span><span class="field-value">Service Call</span></div>
+                        <div class="ticket-field"><span class="field-label">SERVICEREQ:</span><span class="field-value">${call.ProbelmDesc || ''}</span></div>
+                        <div class="ticket-field"><span class="field-label">MAKE:</span><span class="field-value">${call.ProductInfo_SPBrandDesc || ''}</span></div>
+                        <div class="ticket-field"><span class="field-label">TYPE:</span><span class="field-value">${call.ProductInfo_SPProductDesc || ''}</span></div>
+                        <div class="ticket-field"><span class="field-label">MODEL:</span><span class="field-value">${call.ProductInfo_MobelNo || ''}</span></div>
+                        <div class="ticket-field"><span class="field-label">SERIAL:</span><span class="field-value">${call.ProductInfo_SerialNo || ''}</span></div>
+                        <div class="ticket-field"><span class="field-label">DATEIN:</span><span class="field-value">${new Date().toLocaleDateString()}</span></div>
+                        <div class="ticket-field"><span class="field-label">DATEPUR:</span><span class="field-value">${call.ProductInfo_InstallDate || ''}</span></div>
+                        <div class="ticket-field"><span class="field-label">BTADDRESS:</span><span class="field-value">${call.CallNumber || ''}</span></div>
+                        <div class="ticket-field"><span class="field-label">DLRINVOICE:</span><span class="field-value">${call.CallNumber || ''}</span></div>
+                    </div>
+                `;
+            }).join('');
+
+            // Add invoice input listeners
+            filteredCalls.forEach((_, index) => {
+                const input = document.getElementById(`invoice-${index}`);
+                input.addEventListener('input', (e) => {
+                    document.getElementById(`inv-display-${index}`).textContent = e.target.value || '_____';
+                });
+            });
+
+            updateSelection();
+        }
+
+        function copyTicket(index) {
+            const call = filteredCalls[index];
+            const invoice = document.getElementById(`invoice-${index}`).value || '';
+
+            const today = new Date().toLocaleDateString();
+            const zip = (call.ConsumerInfo_Postcode || '').split('-')[0];
+            const phone2 = call.ConsumerInfo_Phone2 !== '0' ? call.ConsumerInfo_Phone2 : '';
+
+            const text = `INVOICE: ${invoice}
+LASTNAME: ${call.ConsumerInfo_ConsumerLastName || ''}
+FIRSTNAME: ${call.ConsumerInfo_ConsumerFirstName || ''}
+ADDRESS: ${call.ConsumerInfo_ConsumerAddress1 || ''}
+CITY: ${call.ConsumerInfo_PostcodeLevel3 || ''}
+STATE: ${call.ConsumerInfo_PostcodeLevel1 || ''}
+ZIP: ${zip}
+PHONE: ${call.ConsumerInfo_Phone1 || ''}
+PHONE2: ${phone2}
+LOCATION: Service Call
+SERVICEREQ: ${call.ProbelmDesc || ''}
+MAKE: ${call.ProductInfo_SPBrandDesc || ''}
+TYPE: ${call.ProductInfo_SPProductDesc || ''}
+MODEL: ${call.ProductInfo_MobelNo || ''}
+SERIAL: ${call.ProductInfo_SerialNo || ''}
+DATEIN: ${today}
+DATEPUR: ${call.ProductInfo_InstallDate || ''}
+BTADDRESS: ${call.CallNumber || ''}
+DLRINVOICE: ${call.CallNumber || ''}`;
+
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Ticket copied to clipboard!');
+            });
+        }
+
+        function updateSelection() {
+            let count = 0;
+            filteredCalls.forEach((_, index) => {
+                const checkbox = document.getElementById(`check-${index}`);
+                const card = document.getElementById(`ticket-${index}`);
+                if (checkbox && checkbox.checked) {
+                    count++;
+                    card.classList.add('selected');
+                } else if (card) {
+                    card.classList.remove('selected');
+                }
+            });
+
+            document.getElementById('selectedCount').textContent = count;
+            document.getElementById('exportBtn').disabled = count === 0;
+        }
+
+        function selectAll() {
+            filteredCalls.forEach((_, index) => {
+                const checkbox = document.getElementById(`check-${index}`);
+                if (checkbox) checkbox.checked = true;
+            });
+            updateSelection();
+        }
+
+        function deselectAll() {
+            filteredCalls.forEach((_, index) => {
+                const checkbox = document.getElementById(`check-${index}`);
+                if (checkbox) checkbox.checked = false;
+            });
+            updateSelection();
+        }
+
+        async function exportDBF() {
+            const selectedCalls = [];
+
+            filteredCalls.forEach((call, index) => {
+                const checkbox = document.getElementById(`check-${index}`);
+                const invoice = document.getElementById(`invoice-${index}`).value;
+
+                if (checkbox && checkbox.checked) {
+                    if (!invoice) {
+                        alert(`Please enter an invoice number for ticket ${index + 1}`);
+                        return;
+                    }
+                    selectedCalls.push({ ...call, invoice });
+                }
+            });
+
+            if (selectedCalls.length === 0) {
+                alert('No tickets selected with invoice numbers');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/export/dbf', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ calls: selectedCalls })
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `lotus_tickets_${new Date().getTime()}.dbf`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                } else {
+                    const data = await response.json();
+                    alert('Export failed: ' + (data.error || 'Unknown error'));
+                }
+            } catch (err) {
+                alert('Export error: ' + err.message);
+            }
+        }
+
+        // Select ticket for SMS
+        function selectTicketForSMS(index, event) {
+            selectedTicketForSMS = filteredCalls[index];
+            generateSMS();
+        }
+
+        // Generate SMS template
+        function generateSMS() {
+            if (!selectedTicketForSMS) return;
+
+            const call = selectedTicketForSMS;
+            const name = `${call.ConsumerInfo_ConsumerFirstName || ''} ${call.ConsumerInfo_ConsumerLastName || ''}`.trim();
+            const brand = call.ProductInfo_SPBrandDesc || 'your appliance';
+            const product = call.ProductInfo_SPProductDesc || 'appliance';
+
+            const sms = `Hello ${name}, this is Metro TV and Appliance regarding your ${brand} ${product} repair.
+
+To schedule your service, please reply with:
+
+1. PHOTO of Model/Serial tag (clear picture on appliance, not paperwork)
+2. PHOTO of the problem (or appliance location if not visible)
+3. Problem description (be descriptive)
+4. Full address with zip code
+5. Second contact name/number (optional, helps if tech can't reach you)
+6. Has another servicer been out?
+
+IMPORTANT: Your warranty company provides an initial date, but this is NOT confirmed. We must first review your ticket and pre-order parts through your warranty company. We will contact you to schedule your CONFIRMED appointment.`;
+
+            document.getElementById('smsTemplate').value = sms;
+            document.getElementById('smsTemplateArea').style.display = 'block';
+        }
+
+        // Copy SMS to clipboard
+        function copySMS() {
+            const sms = document.getElementById('smsTemplate').value;
+            navigator.clipboard.writeText(sms).then(() => {
+                alert('SMS copied to clipboard!');
+            });
+        }
+
+        // Update status to "Waiting on Customer"
+        async function updateStatusWaiting() {
+            if (!selectedTicketForSMS) {
+                alert('Please select a ticket first');
+                return;
+            }
+
+            const confirmed = confirm('Update this ticket status to "WAITING ON CUSTOMER" in ServicePower?');
+            if (!confirmed) return;
+
+            try {
+                const response = await fetch('/api/update/status', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        call: selectedTicketForSMS,
+                        status: 'ACCEPTED',
+                        substatus: 'WAITING ON CUSTOMER'
+                    })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    alert('Status updated successfully!');
+                } else {
+                    alert('Error updating status: ' + (data.error || 'Unknown error'));
+                }
+            } catch (err) {
+                alert('Update error: ' + err.message);
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+ServiceDispatch Setup Instructions
+==================================
+
+1. Install Python dependencies (REQUIRED):
+
+   RECOMMENDED METHOD:
+   pip install -r requirements.txt
+
+   This installs:
+   - Flask 3.0.0 (Web framework)
+   - requests 2.31.0 (API calls)
+   - Werkzeug 3.0.1 (Flask utilities)
+   - pandas 2.1.4 (Data processing - NEW!)
+   - dbf 0.99.1 (DBF file reading - NEW!)
+   - numpy 1.26.2 (Numerical computing - NEW!)
+
+2. Start the application:
+   cd /mnt/c/Users/metro/sp
+   python app.py
+
+3. Open in browser:
+   http://localhost:5000
+
+4. Login credentials:
+   User ID: MET11106
+   Password: [your password]
+   Servicer Account: MET11106
+   Environment: Production
+
+==================================
+Troubleshooting:
+
+If you see "ModuleNotFoundError", run step 1 again.
+If port 5000 is in use, the app will try 5001, 5002, etc.
+
+To stop the server: Press Ctrl+C in terminal

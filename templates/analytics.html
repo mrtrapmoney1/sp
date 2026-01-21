@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics - ServiceDispatch</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #0d1117;
+            color: #c9d1d9;
+            line-height: 1.6;
+        }
+
+        /* Header Navigation */
+        .header {
+            background: linear-gradient(135deg, #1a365d 0%, #2c5282 100%);
+            color: white;
+            padding: 15px 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        .header-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .nav {
+            display: flex;
+            gap: 5px;
+        }
+
+        .nav a {
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: background 0.2s;
+            font-weight: 500;
+        }
+
+        .nav a:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .nav a.active {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .panel {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .panel h2 {
+            font-size: 1.1rem;
+            color: #58a6ff;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #21262d;
+            padding-bottom: 10px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #8b949e;
+            font-size: 0.9rem;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 8px 12px;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            background: #0d1117;
+            color: #c9d1d9;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #58a6ff;
+            box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.1);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #238636;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2ea043;
+        }
+
+        .btn:disabled {
+            background: #21262d;
+            color: #484f58;
+            cursor: not-allowed;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .status {
+            padding: 8px 15px;
+            border-radius: 6px;
+            font-weight: 500;
+            display: none;
+        }
+
+        .status.success {
+            background: #238636;
+            color: white;
+            display: inline-block;
+        }
+
+        .status.error {
+            background: #da3633;
+            color: white;
+            display: inline-block;
+        }
+
+        .status.loading {
+            background: #1f6feb;
+            color: white;
+            display: inline-block;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: #0d1117;
+            padding: 20px;
+            border-radius: 6px;
+            border: 1px solid #30363d;
+            text-align: center;
+        }
+
+        .stat-card .number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #58a6ff;
+        }
+
+        .stat-card .label {
+            font-size: 0.9rem;
+            color: #8b949e;
+            margin-top: 8px;
+        }
+
+        /* Charts Grid */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 20px;
+        }
+
+        .chart-container {
+            background: #0d1117;
+            padding: 20px;
+            border-radius: 6px;
+            border: 1px solid #30363d;
+        }
+
+        .chart-container h3 {
+            color: #c9d1d9;
+            margin-bottom: 15px;
+            font-size: 1rem;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 300px;
+        }
+
+        /* Data Table */
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #30363d;
+        }
+
+        th {
+            background: #0d1117;
+            color: #8b949e;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background: #0d1117;
+        }
+
+        .footer {
+            background: #161b22;
+            border-top: 1px solid #30363d;
+            padding: 20px;
+            text-align: center;
+            color: #8b949e;
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <h1>ServiceDispatch Analytics</h1>
+            <nav class="nav">
+                <a href="/dashboard">Dashboard</a>
+                <a href="/tickets">Tickets</a>
+                <a href="/map">Map</a>
+                <a href="/analytics" class="active">Analytics</a>
+                <a href="#" onclick="logout(); return false;" style="color: #fc8181;">Logout</a>
+            </nav>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Connection Panel -->
+        <div class="panel">
+            <h2>Fetch Settings</h2>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="days">Date Range</label>
+                    <select id="days">
+                        <option value="1">Last 1 day</option>
+                        <option value="2" selected>Last 2 days</option>
+                        <option value="5">Last 5 days</option>
+                        <option value="7">Last 7 days</option>
+                        <option value="14">Last 14 days</option>
+                        <option value="30">Last 30 days</option>
+                        <option value="60">Last 60 days</option>
+                        <option value="90">Last 90 days</option>
+                    </select>
+                </div>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-primary" id="fetchBtn" onclick="fetchCalls()">Load Analytics</button>
+                <div id="status" class="status"></div>
+            </div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid" id="statsGrid" style="display: none;">
+            <div class="stat-card">
+                <div class="number" id="totalCalls">0</div>
+                <div class="label">Total Calls</div>
+            </div>
+            <div class="stat-card">
+                <div class="number" id="uniqueBrands">0</div>
+                <div class="label">Unique Brands</div>
+            </div>
+            <div class="stat-card">
+                <div class="number" id="uniqueProducts">0</div>
+                <div class="label">Product Types</div>
+            </div>
+            <div class="stat-card">
+                <div class="number" id="warrantyTypes">0</div>
+                <div class="label">Warranty Types</div>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="panel" id="chartsPanel" style="display: none;">
+            <h2>Visual Analytics</h2>
+            <div class="charts-grid">
+                <div class="chart-container">
+                    <h3>Calls by Warranty Company</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="warrantyChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <h3>Calls by Status</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="statusChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <h3>Top 10 Brands</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="brandChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <h3>Product Type Distribution</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="productChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Tables -->
+        <div class="panel" id="tablesPanel" style="display: none;">
+            <h2>Detailed Breakdown</h2>
+            <div class="table-container">
+                <h3 style="color: #c9d1d9; margin-bottom: 10px;">Warranty Company Analysis</h3>
+                <table id="warrantyTable">
+                    <thead>
+                        <tr>
+                            <th>Warranty Type</th>
+                            <th>Count</th>
+                            <th>Percentage</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <br><br>
+            <div class="table-container">
+                <h3 style="color: #c9d1d9; margin-bottom: 10px;">Brand Analysis</h3>
+                <table id="brandTable">
+                    <thead>
+                        <tr>
+                            <th>Brand</th>
+                            <th>Count</th>
+                            <th>Percentage</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>ServiceDispatch Analytics Dashboard | Lotus Integration System</p>
+    </div>
+
+    <script>
+        let allCalls = [];
+        let charts = {};
+
+        // Logout
+        async function logout() {
+            if (!confirm('Are you sure you want to logout?')) return;
+
+            try {
+                await fetch('/api/logout', { method: 'POST' });
+                window.location.href = '/';
+            } catch (err) {
+                console.error('Logout error:', err);
+                window.location.href = '/';
+            }
+        }
+
+        async function fetchCalls() {
+            const btn = document.getElementById('fetchBtn');
+            const status = document.getElementById('status');
+            const days = document.getElementById('days').value;
+
+            btn.disabled = true;
+            status.textContent = 'Loading analytics data...';
+            status.className = 'status loading';
+
+            try {
+                const response = await fetch('/api/calls', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ days: parseInt(days) })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    status.textContent = `Analyzing ${data.count} calls`;
+                    status.className = 'status success';
+                    allCalls = data.calls;
+                    generateAnalytics();
+                } else {
+                    status.textContent = data.error || 'Error fetching data';
+                    status.className = 'status error';
+                }
+            } catch (err) {
+                status.textContent = 'Connection error: ' + err.message;
+                status.className = 'status error';
+            }
+
+            btn.disabled = false;
+        }
+
+        function generateAnalytics() {
+            // Calculate stats
+            const brands = new Set();
+            const products = new Set();
+            const warranties = new Set();
+
+            allCalls.forEach(call => {
+                if (call.ProductInfo_SPBrandDesc) brands.add(call.ProductInfo_SPBrandDesc);
+                if (call.ProductInfo_SPProductDesc) products.add(call.ProductInfo_SPProductDesc);
+                if (call.WarrantyType) warranties.add(call.WarrantyType);
+            });
+
+            document.getElementById('totalCalls').textContent = allCalls.length;
+            document.getElementById('uniqueBrands').textContent = brands.size;
+            document.getElementById('uniqueProducts').textContent = products.size;
+            document.getElementById('warrantyTypes').textContent = warranties.size;
+
+            document.getElementById('statsGrid').style.display = 'grid';
+            document.getElementById('chartsPanel').style.display = 'block';
+            document.getElementById('tablesPanel').style.display = 'block';
+
+            generateCharts();
+            generateTables();
+        }
+
+        function generateCharts() {
+            // Warranty chart
+            const warrantyData = {};
+            allCalls.forEach(call => {
+                const warranty = call.WarrantyType || 'Unknown';
+                warrantyData[warranty] = (warrantyData[warranty] || 0) + 1;
+            });
+
+            if (charts.warranty) charts.warranty.destroy();
+            charts.warranty = new Chart(document.getElementById('warrantyChart'), {
+                type: 'pie',
+                data: {
+                    labels: Object.keys(warrantyData),
+                    datasets: [{
+                        data: Object.values(warrantyData),
+                        backgroundColor: ['#1f6feb', '#238636', '#da3633', '#f0883e', '#8b949e']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: '#c9d1d9' } }
+                    }
+                }
+            });
+
+            // Status chart
+            const statusData = {};
+            allCalls.forEach(call => {
+                const status = call.CallStatus || 'Unknown';
+                statusData[status] = (statusData[status] || 0) + 1;
+            });
+
+            if (charts.status) charts.status.destroy();
+            charts.status = new Chart(document.getElementById('statusChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(statusData),
+                    datasets: [{
+                        data: Object.values(statusData),
+                        backgroundColor: ['#238636', '#1f6feb', '#da3633', '#f0883e', '#8b949e']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: '#c9d1d9' } }
+                    }
+                }
+            });
+
+            // Brand chart
+            const brandData = {};
+            allCalls.forEach(call => {
+                const brand = call.ProductInfo_SPBrandDesc || 'Unknown';
+                brandData[brand] = (brandData[brand] || 0) + 1;
+            });
+            const topBrands = Object.entries(brandData).sort((a, b) => b[1] - a[1]).slice(0, 10);
+
+            if (charts.brand) charts.brand.destroy();
+            charts.brand = new Chart(document.getElementById('brandChart'), {
+                type: 'bar',
+                data: {
+                    labels: topBrands.map(b => b[0]),
+                    datasets: [{
+                        label: 'Calls',
+                        data: topBrands.map(b => b[1]),
+                        backgroundColor: '#1f6feb'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { ticks: { color: '#8b949e' } },
+                        y: { ticks: { color: '#8b949e' } }
+                    },
+                    plugins: {
+                        legend: { labels: { color: '#c9d1d9' } }
+                    }
+                }
+            });
+
+            // Product chart
+            const productData = {};
+            allCalls.forEach(call => {
+                const product = call.ProductInfo_SPProductDesc || 'Unknown';
+                productData[product] = (productData[product] || 0) + 1;
+            });
+
+            if (charts.product) charts.product.destroy();
+            charts.product = new Chart(document.getElementById('productChart'), {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(productData),
+                    datasets: [{
+                        label: 'Calls',
+                        data: Object.values(productData),
+                        backgroundColor: '#238636'
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { ticks: { color: '#8b949e' } },
+                        y: { ticks: { color: '#8b949e' } }
+                    },
+                    plugins: {
+                        legend: { labels: { color: '#c9d1d9' } }
+                    }
+                }
+            });
+        }
+
+        function generateTables() {
+            const total = allCalls.length;
+
+            // Warranty table
+            const warrantyData = {};
+            allCalls.forEach(call => {
+                const warranty = call.WarrantyType || 'Unknown';
+                warrantyData[warranty] = (warrantyData[warranty] || 0) + 1;
+            });
+
+            const warrantyTable = document.getElementById('warrantyTable').querySelector('tbody');
+            warrantyTable.innerHTML = Object.entries(warrantyData)
+                .sort((a, b) => b[1] - a[1])
+                .map(([type, count]) => `
+                    <tr>
+                        <td>${type}</td>
+                        <td>${count}</td>
+                        <td>${((count / total) * 100).toFixed(1)}%</td>
+                    </tr>
+                `).join('');
+
+            // Brand table
+            const brandData = {};
+            allCalls.forEach(call => {
+                const brand = call.ProductInfo_SPBrandDesc || 'Unknown';
+                brandData[brand] = (brandData[brand] || 0) + 1;
+            });
+
+            const brandTable = document.getElementById('brandTable').querySelector('tbody');
+            brandTable.innerHTML = Object.entries(brandData)
+                .sort((a, b) => b[1] - a[1])
+                .map(([brand, count]) => `
+                    <tr>
+                        <td>${brand}</td>
+                        <td>${count}</td>
+                        <td>${((count / total) * 100).toFixed(1)}%</td>
+                    </tr>
+                `).join('');
+        }
+    </script>
+</body>
+</html>

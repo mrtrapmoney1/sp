@@ -1,0 +1,103 @@
+╔══════════════════════════════════════════════════════════════╗
+║           ServiceDispatch - Quick Start Guide               ║
+╚══════════════════════════════════════════════════════════════╝
+
+1. INSTALL
+   --------
+   pip install -r requirements.txt
+
+
+2. START SERVER
+   ------------
+   cd /mnt/c/Users/metro/sp
+   python app.py
+
+
+3. OPEN BROWSER
+   ------------
+   http://localhost:5000
+
+
+4. LOGIN
+   ------
+   User ID: MET11106
+   Password: [your password]
+   Servicer Account: MET11106
+   Environment: Production
+
+
+5. USE DASHBOARD
+   -------------
+   • Page loads automatically with 2 days of calls
+   • See stats at top (Total, Open, by warranty company)
+   • Scroll down to see call details
+   • Click "Mark All as Waiting on Customer" to bulk update
+
+
+6. NAVIGATE PAGES
+   --------------
+   Dashboard  → Overview + bulk actions
+   Tickets    → Create tickets, copy/paste, DBF export
+   Map        → Geographic visualization
+   Analytics  → Charts and graphs
+   Diagnosis  → Search parts history (Partlog.dbf)
+   Parts      → Supplier lookup links
+
+
+7. CHANGE DATE RANGE
+   -----------------
+   • Select from dropdown: 1, 2, 5, 7, 14, 30, 60, 90 days
+   • Click "Refresh Data" or "Load" button
+   • Custom range available on Tickets page
+
+
+8. BULK UPDATE CALLS
+   -----------------
+   On Dashboard:
+   1. Load calls (auto-loads on page open)
+   2. Click "Mark All as Waiting on Customer"
+   3. Confirm popup
+   4. Wait for updates
+   5. See results
+
+
+9. TOGGLE LIGHT/DARK
+   ------------------
+   • Click "🌓 Theme" button in header
+   • Available on all pages
+   • Preference saves automatically
+
+
+10. LOGOUT
+    ------
+    Click "Logout" link in header (red text)
+
+
+═══════════════════════════════════════════════════════════════
+
+TROUBLESHOOTING:
+
+• "Flask not found" → pip install -r requirements.txt
+• "Port in use" → Check terminal, Flask will use 5001, 5002, etc.
+• "Not authenticated" → Session expired, login again
+• "0 calls showing" → Try wider date range (Last 7 days)
+• Dashboard not loading → Refresh page (Ctrl+R or Cmd+R)
+
+═══════════════════════════════════════════════════════════════
+
+WHAT'S NEW:
+
+✓ Dashboard auto-loads calls on open
+✓ Business stats at top (warranty company breakdown)
+✓ Bulk update button (mark all as waiting on customer)
+✓ 9 date range options (was only 2-3 before)
+✓ Light/dark theme works on all pages
+✓ Consistent navigation everywhere
+✓ No more redundant login forms
+
+═══════════════════════════════════════════════════════════════
+
+For detailed documentation, see:
+• README_FIXES.md  - Complete user guide
+• CHANGES.md       - Technical changes
+• SETUP.txt        - Installation details
