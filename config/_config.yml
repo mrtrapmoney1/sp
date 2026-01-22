@@ -1,0 +1,355 @@
+# ============================================================================
+# ServiceDispatch - Jekyll Configuration
+# ============================================================================
+# Site Configuration for ServiceDispatch Documentation & Application Portal
+# Version: 1.0.0
+# Last Updated: 2026-01-22
+# ============================================================================
+
+# -----------------------------------------------------------------------------
+# Site Settings
+# -----------------------------------------------------------------------------
+title: "ServiceDispatch"
+subtitle: "Enterprise Service Management Platform"
+name: "ServiceDispatch"
+description: >-
+  Enterprise-grade service dispatch and management platform. Streamline
+  technician scheduling, ticket management, and customer service operations
+  with intelligent routing and real-time analytics.
+
+url: "https://servicedispatch.example.com"
+baseurl: ""
+repository: "organization/servicedispatch"
+
+# Site metadata
+locale: "en-US"
+timezone: "America/Chicago"
+
+# Logo and branding
+logo: "/assets/img/logo.svg"
+masthead_title: "ServiceDispatch"
+
+# Search configuration
+search: true
+search_full_content: true
+search_provider: lunr
+lunr:
+  search_within_pages: true
+
+# -----------------------------------------------------------------------------
+# Build Settings
+# -----------------------------------------------------------------------------
+theme: minimal-mistakes-jekyll
+
+# Markdown processing
+markdown: kramdown
+kramdown:
+  input: GFM
+  hard_wrap: false
+  auto_ids: true
+  footnote_nr: 1
+  entity_output: as_char
+  toc_levels: 1..6
+  smart_quotes: lsquo,rsquo,ldquo,rdquo
+  enable_coderay: false
+  syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    css_class: "highlight"
+    span:
+      line_numbers: false
+    block:
+      line_numbers: true
+      start_line: 1
+
+# Syntax highlighting
+highlighter: rouge
+
+# Sass/CSS processing
+sass:
+  sass_dir: _sass
+  style: compressed
+
+# Permalink structure
+permalink: /:categories/:title/
+
+# Pagination
+paginate: 12
+paginate_path: /page:num/
+
+# -----------------------------------------------------------------------------
+# Plugins
+# -----------------------------------------------------------------------------
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
+  - jekyll-sitemap
+  - jekyll-paginate-v2
+  - jekyll-include-cache
+  - jekyll-archives
+  - jekyll-redirect-from
+  - jekyll-relative-links
+  - jekyll-default-layout
+  - jekyll-titles-from-headings
+  - jemoji
+
+# Whitelist plugins for GitHub Pages
+whitelist:
+  - jekyll-feed
+  - jekyll-seo-tag
+  - jekyll-sitemap
+  - jemoji
+
+# -----------------------------------------------------------------------------
+# Archives
+# -----------------------------------------------------------------------------
+jekyll-archives:
+  enabled:
+    - categories
+    - tags
+  layouts:
+    category: archive-taxonomy
+    tag: archive-taxonomy
+  permalinks:
+    category: /categories/:name/
+    tag: /tags/:name/
+
+# -----------------------------------------------------------------------------
+# Pagination V2
+# -----------------------------------------------------------------------------
+pagination:
+  enabled: true
+  per_page: 12
+  permalink: "/page/:num/"
+  title: ":title - Page :num"
+  sort_field: "date"
+  sort_reverse: true
+
+# -----------------------------------------------------------------------------
+# Collections
+# -----------------------------------------------------------------------------
+collections:
+  docs:
+    output: true
+    permalink: /:collection/:path/
+  api:
+    output: true
+    permalink: /:collection/:path/
+  guides:
+    output: true
+    permalink: /:collection/:path/
+
+# -----------------------------------------------------------------------------
+# Front Matter Defaults
+# -----------------------------------------------------------------------------
+defaults:
+  # All pages
+  - scope:
+      path: ""
+      type: pages
+    values:
+      layout: single
+      author_profile: false
+      read_time: true
+      comments: false
+      share: false
+      related: false
+      toc: true
+      toc_sticky: true
+      sidebar:
+        nav: "docs"
+
+  # Documentation
+  - scope:
+      path: "_docs"
+      type: docs
+    values:
+      layout: single
+      read_time: true
+      toc: true
+      toc_sticky: true
+      sidebar:
+        nav: "docs"
+
+  # API Reference
+  - scope:
+      path: "_api"
+      type: api
+    values:
+      layout: single
+      toc: true
+      toc_sticky: true
+      sidebar:
+        nav: "api"
+
+  # Guides
+  - scope:
+      path: "_guides"
+      type: guides
+    values:
+      layout: single
+      read_time: true
+      toc: true
+      toc_sticky: true
+      sidebar:
+        nav: "guides"
+
+  # Posts
+  - scope:
+      path: ""
+      type: posts
+    values:
+      layout: single
+      author_profile: true
+      read_time: true
+      comments: true
+      share: true
+      related: true
+
+# -----------------------------------------------------------------------------
+# Navigation
+# -----------------------------------------------------------------------------
+# See _data/navigation.yml for navigation configuration
+
+# -----------------------------------------------------------------------------
+# Site Author
+# -----------------------------------------------------------------------------
+author:
+  name: "ServiceDispatch Team"
+  avatar: "/assets/img/team-avatar.png"
+  bio: "Enterprise Service Management Platform"
+  location: "Omaha, NE"
+  email: "support@servicedispatch.example.com"
+  links:
+    - label: "Documentation"
+      icon: "fas fa-fw fa-book"
+      url: "/docs/"
+    - label: "API Reference"
+      icon: "fas fa-fw fa-code"
+      url: "/api/"
+    - label: "GitHub"
+      icon: "fab fa-fw fa-github"
+      url: "https://github.com/organization/servicedispatch"
+
+# -----------------------------------------------------------------------------
+# Footer
+# -----------------------------------------------------------------------------
+footer:
+  links:
+    - label: "Documentation"
+      icon: "fas fa-fw fa-book"
+      url: "/docs/"
+    - label: "API"
+      icon: "fas fa-fw fa-code"
+      url: "/api/"
+    - label: "Support"
+      icon: "fas fa-fw fa-life-ring"
+      url: "/support/"
+    - label: "Status"
+      icon: "fas fa-fw fa-signal"
+      url: "https://status.servicedispatch.example.com"
+
+# -----------------------------------------------------------------------------
+# Reading Files
+# -----------------------------------------------------------------------------
+include:
+  - .htaccess
+  - _pages
+  - _docs
+  - _api
+  - _guides
+
+exclude:
+  - "*.sublime-project"
+  - "*.sublime-workspace"
+  - vendor
+  - .asset-cache
+  - .bundle
+  - .jekyll-assets-cache
+  - .sass-cache
+  - assets/js/plugins
+  - assets/js/_main.js
+  - assets/js/vendor
+  - Capfile
+  - CHANGELOG
+  - config
+  - Gemfile
+  - Gemfile.lock
+  - Gruntfile.js
+  - gulpfile.js
+  - LICENSE
+  - log
+  - node_modules
+  - package.json
+  - package-lock.json
+  - Rakefile
+  - README
+  - tmp
+  - /docs
+  - /test
+  - __pycache__
+  - "*.py"
+  - "*.pyc"
+  - .env
+  - .env.example
+  - requirements.txt
+  - venv
+
+keep_files:
+  - .git
+  - .svn
+
+encoding: "utf-8"
+markdown_ext: "markdown,mkdown,mkdn,mkd,md"
+
+# -----------------------------------------------------------------------------
+# HTML Compression
+# -----------------------------------------------------------------------------
+compress_html:
+  clippings: all
+  comments: all
+  endings: all
+  startings: []
+  blanklines: false
+  profile: false
+
+# -----------------------------------------------------------------------------
+# Analytics
+# -----------------------------------------------------------------------------
+analytics:
+  provider: "google-gtag"
+  google:
+    tracking_id: "G-XXXXXXXXXX"
+    anonymize_ip: true
+
+# -----------------------------------------------------------------------------
+# Comments (if enabled)
+# -----------------------------------------------------------------------------
+comments:
+  provider: false
+
+# -----------------------------------------------------------------------------
+# SEO
+# -----------------------------------------------------------------------------
+twitter:
+  username: "servicedispatch"
+
+facebook:
+  app_id:
+  publisher:
+
+og_image: "/assets/img/og-image.png"
+
+social:
+  type: Organization
+  name: ServiceDispatch
+  links:
+    - "https://twitter.com/servicedispatch"
+    - "https://github.com/organization/servicedispatch"
+
+# -----------------------------------------------------------------------------
+# Development Settings
+# -----------------------------------------------------------------------------
+# Uncomment for local development
+# host: 0.0.0.0
+# port: 4000
+# livereload: true

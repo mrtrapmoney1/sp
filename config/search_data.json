@@ -1,0 +1,266 @@
+{
+  "meta": {
+    "version": "1.0.0",
+    "generated": "2026-01-22T00:00:00Z",
+    "generator": "ServiceDispatch Search Indexer",
+    "totalEntries": 24
+  },
+  "index": [
+    {
+      "id": "dashboard",
+      "title": "Dashboard",
+      "url": "/dashboard",
+      "category": "Application",
+      "tags": ["main", "home", "overview", "statistics"],
+      "content": "Main dashboard view displaying service call statistics, technician performance metrics, and real-time operational data. Access quick actions and navigate to all system features.",
+      "keywords": ["dashboard", "home", "statistics", "metrics", "overview"]
+    },
+    {
+      "id": "tickets",
+      "title": "Ticket Management",
+      "url": "/tickets",
+      "category": "Application",
+      "tags": ["tickets", "service calls", "management"],
+      "content": "Create, view, and manage service tickets. Track ticket lifecycle from creation to completion. Export tickets to DBF format for Lotus integration.",
+      "keywords": ["tickets", "service calls", "create ticket", "view tickets", "export DBF"]
+    },
+    {
+      "id": "map",
+      "title": "Service Map",
+      "url": "/map",
+      "category": "Application",
+      "tags": ["map", "geographic", "location", "routing"],
+      "content": "Interactive map showing service call locations, technician positions, and service territory coverage. Visualize geographic distribution and optimize routing.",
+      "keywords": ["map", "location", "geographic", "routing", "territory", "Leaflet"]
+    },
+    {
+      "id": "analytics",
+      "title": "Analytics Dashboard",
+      "url": "/analytics",
+      "category": "Application",
+      "tags": ["analytics", "reports", "charts", "KPI"],
+      "content": "Data visualization and analytics dashboard. View charts for service call trends, technician performance, first-time fix rates, and customer satisfaction metrics.",
+      "keywords": ["analytics", "reports", "charts", "KPI", "metrics", "performance"]
+    },
+    {
+      "id": "diagnosis",
+      "title": "Smart Diagnosis",
+      "url": "/diagnosis",
+      "category": "Application",
+      "tags": ["diagnosis", "AI", "parts", "recommendation"],
+      "content": "AI-powered diagnosis assistant providing parts recommendations based on symptom analysis and historical repair data. Identify likely causes and required parts.",
+      "keywords": ["diagnosis", "AI", "parts", "recommendation", "symptoms", "repair"]
+    },
+    {
+      "id": "parts",
+      "title": "Parts Lookup",
+      "url": "/parts",
+      "category": "Application",
+      "tags": ["parts", "suppliers", "inventory", "search"],
+      "content": "Multi-supplier parts search across 8+ vendors including Marcone, Encompass, GE, Frigidaire, Bosch, RepairClinic, Appliance Parts Pros, and Sears.",
+      "keywords": ["parts", "suppliers", "Marcone", "Encompass", "inventory", "search"]
+    },
+    {
+      "id": "doc-getting-started",
+      "title": "Getting Started",
+      "url": "/docs/getting-started/",
+      "category": "Documentation",
+      "tags": ["setup", "installation", "quickstart"],
+      "content": "Quick start guide for ServiceDispatch. Learn how to install dependencies, configure environment variables, and launch the application.",
+      "keywords": ["getting started", "installation", "setup", "quickstart", "configuration"]
+    },
+    {
+      "id": "doc-authentication",
+      "title": "Authentication",
+      "url": "/docs/authentication/",
+      "category": "Documentation",
+      "tags": ["auth", "login", "security", "session"],
+      "content": "Authentication and authorization documentation. Configure user credentials, session management, and security settings.",
+      "keywords": ["authentication", "login", "security", "session", "credentials"]
+    },
+    {
+      "id": "doc-api-overview",
+      "title": "API Overview",
+      "url": "/api/overview/",
+      "category": "API Reference",
+      "tags": ["API", "REST", "endpoints"],
+      "content": "Overview of ServiceDispatch REST API. Learn about authentication, request formats, response structures, and error handling.",
+      "keywords": ["API", "REST", "endpoints", "overview", "reference"]
+    },
+    {
+      "id": "api-calls",
+      "title": "Service Calls API",
+      "url": "/api/calls/",
+      "category": "API Reference",
+      "tags": ["API", "calls", "CRUD"],
+      "content": "API endpoints for service call management. Create, read, update, and delete service calls programmatically.",
+      "keywords": ["API", "service calls", "CRUD", "create", "read", "update", "delete"]
+    },
+    {
+      "id": "api-tickets",
+      "title": "Tickets API",
+      "url": "/api/tickets/",
+      "category": "API Reference",
+      "tags": ["API", "tickets", "management"],
+      "content": "API endpoints for ticket operations. Manage ticket lifecycle, status updates, and assignments through REST API.",
+      "keywords": ["API", "tickets", "status", "assignment", "lifecycle"]
+    },
+    {
+      "id": "api-login",
+      "title": "Login API",
+      "url": "/api/login/",
+      "category": "API Reference",
+      "tags": ["API", "authentication", "login"],
+      "content": "Authentication endpoint for user login. Submit credentials and receive session token for subsequent API requests.",
+      "keywords": ["API", "login", "authentication", "session", "token"]
+    },
+    {
+      "id": "guide-servicepower",
+      "title": "ServicePower Integration",
+      "url": "/guides/servicepower/",
+      "category": "Integration Guides",
+      "tags": ["ServicePower", "SOAP", "integration"],
+      "content": "Guide for integrating with ServicePower API. Configure SOAP endpoints, authentication, and data synchronization.",
+      "keywords": ["ServicePower", "SOAP", "API", "integration", "synchronization"]
+    },
+    {
+      "id": "guide-lotus",
+      "title": "Lotus Approach Integration",
+      "url": "/guides/lotus/",
+      "category": "Integration Guides",
+      "tags": ["Lotus", "DBF", "database", "integration"],
+      "content": "Integration guide for Lotus Approach database. Read and write DBF files, map fields, and synchronize data.",
+      "keywords": ["Lotus", "Approach", "DBF", "database", "integration", "dBase"]
+    },
+    {
+      "id": "guide-deployment",
+      "title": "Deployment Guide",
+      "url": "/guides/deployment/",
+      "category": "Integration Guides",
+      "tags": ["deployment", "production", "WSGI"],
+      "content": "Production deployment guide. Configure WSGI server, set up reverse proxy, and implement security best practices.",
+      "keywords": ["deployment", "production", "WSGI", "Gunicorn", "nginx", "security"]
+    },
+    {
+      "id": "coding-standards",
+      "title": "Coding Standards",
+      "url": "/docs/coding-standards/",
+      "category": "Documentation",
+      "tags": ["standards", "style guide", "best practices"],
+      "content": "Comprehensive coding standards for ServiceDispatch development. Python, HTML, CSS, and JavaScript conventions following Microsoft Principal Developer practices.",
+      "keywords": ["coding standards", "style guide", "Python", "PEP8", "best practices"]
+    },
+    {
+      "id": "testing",
+      "title": "Testing Guide",
+      "url": "/docs/testing/",
+      "category": "Documentation",
+      "tags": ["testing", "pytest", "coverage"],
+      "content": "Testing documentation for ServiceDispatch. Write unit tests, integration tests, and achieve code coverage targets.",
+      "keywords": ["testing", "pytest", "unit tests", "integration tests", "coverage"]
+    },
+    {
+      "id": "troubleshooting",
+      "title": "Troubleshooting",
+      "url": "/docs/troubleshooting/",
+      "category": "Documentation",
+      "tags": ["troubleshooting", "errors", "debugging"],
+      "content": "Common issues and solutions. Debug authentication problems, API errors, and database connectivity issues.",
+      "keywords": ["troubleshooting", "errors", "debugging", "solutions", "FAQ"]
+    },
+    {
+      "id": "config-environment",
+      "title": "Environment Configuration",
+      "url": "/docs/configuration/environment/",
+      "category": "Documentation",
+      "tags": ["configuration", "environment", "variables"],
+      "content": "Environment variable configuration reference. Set up API credentials, database connections, and application settings.",
+      "keywords": ["configuration", "environment variables", "settings", ".env"]
+    },
+    {
+      "id": "config-themes",
+      "title": "Theme Configuration",
+      "url": "/docs/configuration/themes/",
+      "category": "Documentation",
+      "tags": ["themes", "dark mode", "light mode", "customization"],
+      "content": "Customize application appearance with theme configuration. Toggle between dark and light modes, adjust colors and typography.",
+      "keywords": ["themes", "dark mode", "light mode", "colors", "customization"]
+    },
+    {
+      "id": "release-notes",
+      "title": "Release Notes",
+      "url": "/releases/",
+      "category": "Documentation",
+      "tags": ["releases", "changelog", "updates"],
+      "content": "Version history and release notes. Track new features, bug fixes, and breaking changes across releases.",
+      "keywords": ["release notes", "changelog", "version history", "updates"]
+    },
+    {
+      "id": "about",
+      "title": "About ServiceDispatch",
+      "url": "/about/",
+      "category": "Information",
+      "tags": ["about", "overview", "company"],
+      "content": "About ServiceDispatch platform. Learn about our mission, capabilities, and the team behind the enterprise service management solution.",
+      "keywords": ["about", "overview", "mission", "capabilities", "platform"]
+    },
+    {
+      "id": "support",
+      "title": "Support",
+      "url": "/support/",
+      "category": "Information",
+      "tags": ["support", "help", "contact"],
+      "content": "Get help with ServiceDispatch. Contact support team, access documentation, and find community resources.",
+      "keywords": ["support", "help", "contact", "assistance", "resources"]
+    },
+    {
+      "id": "privacy",
+      "title": "Privacy Policy",
+      "url": "/privacy/",
+      "category": "Legal",
+      "tags": ["privacy", "policy", "legal"],
+      "content": "Privacy policy for ServiceDispatch. Learn how we collect, use, and protect your data.",
+      "keywords": ["privacy", "policy", "data protection", "GDPR"]
+    }
+  ],
+  "categories": [
+    {
+      "id": "application",
+      "name": "Application",
+      "description": "Core application features and pages"
+    },
+    {
+      "id": "documentation",
+      "name": "Documentation",
+      "description": "User guides and technical documentation"
+    },
+    {
+      "id": "api-reference",
+      "name": "API Reference",
+      "description": "REST API endpoint documentation"
+    },
+    {
+      "id": "integration-guides",
+      "name": "Integration Guides",
+      "description": "Third-party integration documentation"
+    },
+    {
+      "id": "information",
+      "name": "Information",
+      "description": "General information pages"
+    },
+    {
+      "id": "legal",
+      "name": "Legal",
+      "description": "Legal and compliance documents"
+    }
+  ],
+  "synonyms": {
+    "ticket": ["service call", "work order", "job", "request"],
+    "technician": ["tech", "service tech", "field tech", "engineer"],
+    "dashboard": ["home", "main", "overview"],
+    "analytics": ["reports", "statistics", "metrics", "KPIs"],
+    "parts": ["components", "inventory", "supplies"],
+    "map": ["location", "geographic", "territory"]
+  }
+}

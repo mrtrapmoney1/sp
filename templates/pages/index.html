@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - ServiceDispatch</title>
+    <link rel="icon" type="image/svg+xml" href="/static/img/favicon.svg">
+    <link rel="stylesheet" href="/static/css/base.css">
+    <link rel="stylesheet" href="/static/css/components.css">
+    <link rel="stylesheet" href="/static/css/themes.css">
+    <style>
+        .dashboard-header {
+            background: var(--bg-header, linear-gradient(135deg, #1a365d 0%, #2c5282 100%));
+            color: white;
+            padding: 15px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: var(--shadow-md);
+        }
+
+        .header-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .header-content h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .nav {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        .nav a {
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: background 0.2s;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .nav a:hover { background: rgba(255,255,255,0.1); }
+        .nav a.active { background: rgba(255,255,255,0.2); }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .theme-toggle, .logout-btn {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .theme-toggle:hover, .logout-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .logout-btn {
+            background: #e53e3e;
+            border-color: #e53e3e;
+        }
+
+        .logout-btn:hover {
+            background: #c53030;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--bg-elevated, #1e1e1e);
+            border: 1px solid var(--border-primary, #333);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--accent-primary, #4299e1);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-muted, #888);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Date Controls */
+        .control-panel {
+            background: var(--bg-elevated, #1e1e1e);
+            border: 1px solid var(--border-primary, #333);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .control-panel h2 {
+            margin-bottom: 20px;
+            font-size: 1.25rem;
+            color: var(--text-primary);
+        }
+
+        .date-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: flex-end;
+        }
+
+        .quick-dates {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .date-btn {
+            padding: 10px 16px;
+            border: 1px solid var(--border-primary, #444);
+            background: var(--bg-secondary, #2d2d2d);
+            color: var(--text-primary);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .date-btn:hover {
+            background: var(--accent-primary, #4299e1);
+            border-color: var(--accent-primary, #4299e1);
+            color: white;
+        }
+
+        .date-btn.active {
+            background: var(--accent-primary, #4299e1);
+            border-color: var(--accent-primary, #4299e1);
+            color: white;
+        }
+
+        .date-input-group {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+
+        .date-input-group label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+        }
+
+        .date-input-group input[type="date"] {
+            padding: 10px 12px;
+            border: 1px solid var(--border-primary, #444);
+            background: var(--bg-secondary, #2d2d2d);
+            color: var(--text-primary);
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        .load-btn {
+            padding: 10px 24px;
+            background: var(--color-success-500, #38a169);
+            border: none;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .load-btn:hover {
+            background: var(--color-success-400, #48bb78);
+        }
+
+        .load-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .status {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        .status.loading { background: var(--accent-subtle, #2a4365); color: var(--accent-fg, #63b3ed); }
+        .status.success { background: var(--success-subtle, #1c4532); color: var(--success-fg, #68d391); }
+        .status.error { background: var(--danger-subtle, #4a1a1a); color: var(--danger-fg, #fc8181); }
+
+        /* Tickets Container */
+        .tickets-section {
+            background: var(--bg-elevated, #1e1e1e);
+            border: 1px solid var(--border-primary, #333);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .tickets-section h2 {
+            margin-bottom: 20px;
+            font-size: 1.25rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .ticket-count {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            font-weight: normal;
+        }
+
+        .tickets-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 15px;
+        }
+
+        .ticket-card {
+            background: var(--bg-secondary, #2d2d2d);
+            border: 1px solid var(--border-secondary, #404040);
+            border-radius: 8px;
+            padding: 15px;
+            transition: border-color 0.2s;
+        }
+
+        .ticket-card:hover {
+            border-color: var(--accent-primary, #4299e1);
+        }
+
+        .ticket-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .ticket-id {
+            font-weight: 600;
+            color: var(--accent-fg, #63b3ed);
+            font-size: 0.95rem;
+        }
+
+        .ticket-status {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-open { background: var(--color-warning-500); color: #000; }
+        .status-scheduled { background: var(--accent-primary); color: white; }
+        .status-completed { background: var(--color-success-500); color: white; }
+        .status-closed { background: var(--text-muted); color: white; }
+
+        .ticket-customer {
+            font-size: 1rem;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .ticket-details {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .ticket-details p {
+            margin: 4px 0;
+        }
+
+        .ticket-details strong {
+            color: var(--text-muted);
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-muted);
+        }
+
+        /* Footer */
+        .dashboard-footer {
+            background: var(--bg-secondary, #1a1a1a);
+            border-top: 1px solid var(--border-primary, #333);
+            padding: 15px 20px;
+            margin-top: 30px;
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav { display: none; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .tickets-grid { grid-template-columns: 1fr; }
+            .date-controls { flex-direction: column; }
+            .quick-dates { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="dashboard-header">
+        <div class="header-content">
+            <h1>ServiceDispatch</h1>
+            <nav class="nav">
+                <a href="/dashboard" class="active">Dashboard</a>
+                <a href="/tickets">Tickets</a>
+                <a href="/map">Map</a>
+                <a href="/analytics">Analytics</a>
+                <a href="/diagnosis">Diagnosis</a>
+                <a href="/parts">Parts</a>
+            </nav>
+            <div class="header-actions">
+                <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Theme">
+                    <span id="themeIcon">☀️</span>
+                </button>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="totalCalls">-</div>
+                <div class="stat-label">Total Calls</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="openCalls">-</div>
+                <div class="stat-label">Open</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="scheduledCalls">-</div>
+                <div class="stat-label">Scheduled</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="completedCalls">-</div>
+                <div class="stat-label">Completed</div>
+            </div>
+        </div>
+
+        <!-- Date Controls -->
+        <div class="control-panel">
+            <h2>Load Service Calls</h2>
+            <div class="date-controls">
+                <div>
+                    <label style="display:block; margin-bottom:8px; color:var(--text-muted); font-size:0.85rem;">Quick Select</label>
+                    <div class="quick-dates">
+                        <button class="date-btn active" data-days="0">Today</button>
+                        <button class="date-btn" data-days="1">Yesterday</button>
+                        <button class="date-btn" data-days="2">2 Days</button>
+                        <button class="date-btn" data-days="5">5 Days</button>
+                        <button class="date-btn" data-days="7">7 Days</button>
+                        <button class="date-btn" data-days="30">30 Days</button>
+                        <button class="date-btn" data-days="60">60 Days</button>
+                    </div>
+                </div>
+                <div class="date-input-group">
+                    <div>
+                        <label for="fromDate">From Date</label>
+                        <input type="date" id="fromDate">
+                    </div>
+                    <div>
+                        <label for="toDate">To Date</label>
+                        <input type="date" id="toDate">
+                    </div>
+                </div>
+                <button class="load-btn" id="loadBtn" onclick="loadCalls()">Load Calls</button>
+            </div>
+            <div id="status" class="status" style="display:none;"></div>
+        </div>
+
+        <!-- Tickets -->
+        <div class="tickets-section">
+            <h2>
+                Service Calls
+                <span class="ticket-count" id="ticketCount"></span>
+            </h2>
+            <div class="tickets-grid" id="ticketsContainer">
+                <div class="no-data">Select a date range and click "Load Calls" to view service calls</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="dashboard-footer">
+        <p>&copy; 2026 ServiceDispatch - Metro TV & Appliance | <a href="/docs/" style="color:var(--accent-fg);">Documentation</a></p>
+    </footer>
+
+    <script>
+        let allCalls = [];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            initTheme();
+            initDates();
+            setupDateButtons();
+            // Auto-load today's calls
+            loadCalls();
+        });
+
+        function initTheme() {
+            const theme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', theme);
+            updateThemeIcon(theme);
+        }
+
+        function toggleTheme() {
+            const current = document.documentElement.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+            updateThemeIcon(next);
+        }
+
+        function updateThemeIcon(theme) {
+            document.getElementById('themeIcon').textContent = theme === 'dark' ? '☀️' : '🌙';
+        }
+
+        function initDates() {
+            const today = new Date();
+            const todayStr = today.toISOString().split('T')[0];
+            document.getElementById('fromDate').value = todayStr;
+            document.getElementById('toDate').value = todayStr;
+        }
+
+        function setupDateButtons() {
+            document.querySelectorAll('.date-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Update active state
+                    document.querySelectorAll('.date-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+
+                    // Calculate dates
+                    const days = parseInt(this.dataset.days);
+                    const today = new Date();
+                    const fromDate = new Date();
+                    fromDate.setDate(today.getDate() - days);
+
+                    document.getElementById('fromDate').value = fromDate.toISOString().split('T')[0];
+                    document.getElementById('toDate').value = today.toISOString().split('T')[0];
+                });
+            });
+        }
+
+        async function loadCalls() {
+            const status = document.getElementById('status');
+            const container = document.getElementById('ticketsContainer');
+            const loadBtn = document.getElementById('loadBtn');
+
+            const fromDate = document.getElementById('fromDate').value;
+            const toDate = document.getElementById('toDate').value;
+
+            if (!fromDate || !toDate) {
+                showStatus('Please select both From and To dates', 'error');
+                return;
+            }
+
+            loadBtn.disabled = true;
+            showStatus('Loading service calls...', 'loading');
+            container.innerHTML = '<div class="no-data">Loading...</div>';
+
+            try {
+                const response = await fetch('/api/calls', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ from_date: fromDate, to_date: toDate })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    allCalls = data.calls;
+                    showStatus(`Loaded ${data.count} service calls`, 'success');
+                    displayCalls(data.calls);
+                    updateStats(data.calls);
+                    document.getElementById('ticketCount').textContent = `(${data.count} total)`;
+                } else {
+                    showStatus(data.error || 'Failed to load calls', 'error');
+                    container.innerHTML = '<div class="no-data">Error loading calls. Please check credentials.</div>';
+                }
+            } catch (err) {
+                showStatus('Connection error: ' + err.message, 'error');
+                container.innerHTML = '<div class="no-data">Connection error</div>';
+            }
+
+            loadBtn.disabled = false;
+        }
+
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = 'status ' + type;
+            status.style.display = 'block';
+        }
+
+        function displayCalls(calls) {
+            const container = document.getElementById('ticketsContainer');
+
+            if (calls.length === 0) {
+                container.innerHTML = '<div class="no-data">No service calls found for selected date range</div>';
+                return;
+            }
+
+            // Sort by schedule date (most recent first)
+            const sortedCalls = [...calls].sort((a, b) => {
+                const dateA = a.ScheduleDate || a.CallCreatedOn || '';
+                const dateB = b.ScheduleDate || b.CallCreatedOn || '';
+                return dateB.localeCompare(dateA);
+            });
+
+            container.innerHTML = sortedCalls.map(call => {
+                const status = (call.CallStatus || 'UNKNOWN').toUpperCase();
+                const statusClass = getStatusClass(status);
+
+                const customerName = [
+                    call.ConsumerInfo_ConsumerFirstName || '',
+                    call.ConsumerInfo_ConsumerLastName || ''
+                ].filter(Boolean).join(' ') || 'Unknown Customer';
+
+                const address = [
+                    call.ConsumerInfo_ConsumerAddress1 || '',
+                    call.ConsumerInfo_PostcodeLevel3 || '',
+                    call.ConsumerInfo_PostcodeLevel1 || ''
+                ].filter(Boolean).join(', ');
+
+                const phone = call.ConsumerInfo_Phone1 || call.ConsumerInfo_CellPhone || '-';
+                const product = call.ProductInfo_SPProductDesc || call.ProductInfo_SPBrandDesc || '-';
+                const problem = call.ProbelmDesc || call.ProblemType || '-';
+                const scheduleDate = call.ScheduleDate || '-';
+                const callNumber = call.CallNumber || call.FSSCallId || '-';
+
+                return `
+                    <div class="ticket-card">
+                        <div class="ticket-header">
+                            <span class="ticket-id">#${callNumber}</span>
+                            <span class="ticket-status ${statusClass}">${status}</span>
+                        </div>
+                        <div class="ticket-customer">${escapeHtml(customerName)}</div>
+                        <div class="ticket-details">
+                            <p><strong>Address:</strong> ${escapeHtml(address)}</p>
+                            <p><strong>Phone:</strong> ${escapeHtml(phone)}</p>
+                            <p><strong>Product:</strong> ${escapeHtml(product)}</p>
+                            <p><strong>Problem:</strong> ${escapeHtml(problem)}</p>
+                            <p><strong>Scheduled:</strong> ${escapeHtml(scheduleDate)}</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function getStatusClass(status) {
+            if (status.includes('COMPLETE')) return 'status-completed';
+            if (status.includes('CLOSED')) return 'status-closed';
+            if (status.includes('SCHED') || status.includes('ASSIGNED')) return 'status-scheduled';
+            return 'status-open';
+        }
+
+        function updateStats(calls) {
+            const total = calls.length;
+            const open = calls.filter(c => {
+                const s = (c.CallStatus || '').toUpperCase();
+                return !s.includes('COMPLETE') && !s.includes('CLOSED') && !s.includes('CANCEL');
+            }).length;
+            const scheduled = calls.filter(c => {
+                const s = (c.CallStatus || '').toUpperCase();
+                return s.includes('SCHED') || s.includes('ASSIGNED');
+            }).length;
+            const completed = calls.filter(c => {
+                const s = (c.CallStatus || '').toUpperCase();
+                return s.includes('COMPLETE');
+            }).length;
+
+            document.getElementById('totalCalls').textContent = total;
+            document.getElementById('openCalls').textContent = open;
+            document.getElementById('scheduledCalls').textContent = scheduled;
+            document.getElementById('completedCalls').textContent = completed;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        async function logout() {
+            if (!confirm('Are you sure you want to logout?')) return;
+
+            try {
+                await fetch('/api/logout', { method: 'POST' });
+            } catch (e) {}
+            window.location.href = '/';
+        }
+    </script>
+</body>
+</html>

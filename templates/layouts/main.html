@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    {# ==========================================================================
+       ServiceDispatch - Main Layout Template
+       ==========================================================================
+       Base layout providing consistent structure across all application pages.
+
+       Usage:
+       {% extends "layouts/main.html" %}
+       {% block title %}Page Title{% endblock %}
+       {% block content %}...{% endblock %}
+
+       Available Blocks:
+       - title: Page title (appears in browser tab)
+       - meta_description: SEO meta description
+       - styles: Additional page-specific CSS
+       - content: Main page content
+       - scripts: Additional page-specific JavaScript
+       ========================================================================== #}
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    {# SEO Meta Tags #}
+    <meta name="description" content="{% block meta_description %}ServiceDispatch - Enterprise Service Management Platform{% endblock %}">
+    <meta name="keywords" content="service dispatch, field service, technician management, ticket system">
+    <meta name="author" content="ServiceDispatch">
+    <meta name="robots" content="noindex, nofollow">
+
+    {# Open Graph Tags #}
+    <meta property="og:title" content="{% block og_title %}ServiceDispatch{% endblock %}">
+    <meta property="og:description" content="Enterprise Service Management Platform">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="{{ url_for('static', filename='img/og-image.png') }}">
+
+    {# Page Title #}
+    <title>{% block title %}ServiceDispatch{% endblock %} | ServiceDispatch</title>
+
+    {# Favicon #}
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/favicon.svg') }}">
+    <link rel="alternate icon" type="image/x-icon" href="{{ url_for('static', filename='img/favicon.ico') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='img/apple-touch-icon.png') }}">
+
+    {# Preconnect to External Origins #}
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="preconnect" href="https://unpkg.com" crossorigin>
+
+    {# Core Stylesheets #}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/themes.css') }}">
+
+    {# Page-Specific Styles #}
+    {% block styles %}{% endblock %}
+
+    {# Theme Initialization (Prevent Flash) #}
+    <script>
+        (function() {
+            const theme = localStorage.getItem('servicedispatch-theme') ||
+                          (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
+</head>
+<body>
+    {# Header #}
+    {% include 'base/header.html' %}
+
+    {# Main Content Area #}
+    <main id="main-content" class="sd-main" role="main">
+        {# Flash Messages #}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="sd-flash-messages" role="alert">
+                    {% for category, message in messages %}
+                        <div class="alert alert--{{ category }}">
+                            <span class="alert__message">{{ message }}</span>
+                            <button type="button" class="alert__close" onclick="this.parentElement.remove()">
+                                <span aria-hidden="true">&times;</span>
+                                <span class="sr-only">Dismiss</span>
+                            </button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {# Page Content #}
+        {% block content %}{% endblock %}
+    </main>
+
+    {# Footer #}
+    {% include 'base/footer.html' %}
+
+    {# Core JavaScript #}
+    <script src="{{ url_for('static', filename='js/core.js') }}"></script>
+
+    {# Page-Specific Scripts #}
+    {% block scripts %}{% endblock %}
+</body>
+</html>

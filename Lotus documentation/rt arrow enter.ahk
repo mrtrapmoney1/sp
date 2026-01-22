@@ -1,2 +1,0 @@
-Send ("{Left}")
-Send ("{Enter}")

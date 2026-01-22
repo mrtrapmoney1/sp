@@ -154,7 +154,7 @@ def fetch_calls(user_id: str, password: str, servicer_account: str,
 @app.route('/')
 def login():
     """Render login page"""
-    return render_template('login.html', environments=ENVIRONMENTS)
+    return render_template('pages/login.html', environments=ENVIRONMENTS)
 
 
 @app.route('/dashboard')
@@ -162,7 +162,7 @@ def index():
     """Render main dashboard"""
     if 'credentials' not in session:
         return redirect('/')
-    return render_template('index.html', environments=ENVIRONMENTS, active_page='dashboard')
+    return render_template('pages/index.html', environments=ENVIRONMENTS, active_page='dashboard')
 
 
 @app.route('/api/calls', methods=['POST'])
@@ -205,7 +205,7 @@ def tickets():
     """Render ticket creator page"""
     if 'credentials' not in session:
         return redirect('/')
-    return render_template('tickets.html', environments=ENVIRONMENTS, active_page='tickets')
+    return render_template('pages/tickets.html', environments=ENVIRONMENTS, active_page='tickets')
 
 
 @app.route('/map')
@@ -213,7 +213,7 @@ def map_view():
     """Render map visualization page"""
     if 'credentials' not in session:
         return redirect('/')
-    return render_template('map.html', environments=ENVIRONMENTS, active_page='map')
+    return render_template('pages/map.html', environments=ENVIRONMENTS, active_page='map')
 
 
 @app.route('/analytics')
@@ -221,7 +221,7 @@ def analytics():
     """Render analytics dashboard page"""
     if 'credentials' not in session:
         return redirect('/')
-    return render_template('analytics.html', environments=ENVIRONMENTS, active_page='analytics')
+    return render_template('pages/analytics.html', environments=ENVIRONMENTS, active_page='analytics')
 
 
 @app.route('/diagnosis')
@@ -229,7 +229,7 @@ def diagnosis():
     """Render enhanced diagnosis helper page"""
     if 'credentials' not in session:
         return redirect('/')
-    return render_template('diagnosis_enhanced.html', environments=ENVIRONMENTS, active_page='diagnosis')
+    return render_template('pages/diagnosis_enhanced.html', environments=ENVIRONMENTS, active_page='diagnosis')
 
 
 @app.route('/parts')
@@ -237,7 +237,7 @@ def parts():
     """Render parts lookup page"""
     if 'credentials' not in session:
         return redirect('/')
-    return render_template('parts.html', environments=ENVIRONMENTS, active_page='parts')
+    return render_template('pages/parts.html', environments=ENVIRONMENTS, active_page='parts')
 
 
 @app.route('/api/login', methods=['POST'])
@@ -283,7 +283,7 @@ def get_parts_history():
     search_term = data.get('search', '').lower()
 
     try:
-        dbf_path = 'Lotus documentation/Partlog.dbf'
+        dbf_path = 'data/lotus-database/Partlog.dbf'
 
         # Read DBF file using dbfread library and convert to pandas DataFrame
         table = DBF(dbf_path, load=True, ignore_missing_memofile=True)
@@ -575,7 +575,7 @@ def get_parts_analytics():
     problem = data.get('problem', '').lower()
 
     try:
-        dbf_path = 'Lotus documentation/Partlog.dbf'
+        dbf_path = 'data/lotus-database/Partlog.dbf'
 
         # Read DBF file
         table = DBF(dbf_path, load=True, ignore_missing_memofile=True)
@@ -678,7 +678,7 @@ def get_parts_analytics():
 def get_customer_analytics():
     """Get customer database analytics using pandas"""
     try:
-        dbf_path = 'Lotus documentation/CUSTDATA.dbf'
+        dbf_path = 'data/lotus-database/CUSTDATA.dbf'
 
         if not os.path.exists(dbf_path):
             return jsonify({'success': False, 'error': 'Customer database not found', 'analytics': {}})
@@ -742,7 +742,7 @@ def get_recommendations():
     problem = data.get('problem', '').lower()
 
     try:
-        dbf_path = 'Lotus documentation/Partlog.dbf'
+        dbf_path = 'data/lotus-database/Partlog.dbf'
 
         # Read parts history
         table = DBF(dbf_path, load=True, ignore_missing_memofile=True)

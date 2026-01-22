@@ -1,0 +1,149 @@
+{# ==========================================================================
+   ServiceDispatch - Unified Footer Component
+   ==========================================================================
+   This footer template provides consistent footer content across all pages.
+   Include this template using: {% include 'base/footer.html' %}
+
+   CSS Dependencies:
+   - /static/css/base.css
+   - /static/css/themes.css
+   ========================================================================== #}
+
+<footer class="sd-footer" role="contentinfo">
+    <div class="sd-footer__container">
+        {# Copyright #}
+        <div class="sd-footer__copyright">
+            &copy; {{ now().year if now is defined else '2026' }} ServiceDispatch. All rights reserved.
+        </div>
+
+        {# Footer Navigation #}
+        <nav class="sd-footer__links" aria-label="Footer navigation">
+            <a href="/docs/" class="sd-footer__link">Documentation</a>
+            <a href="/api/" class="sd-footer__link">API Reference</a>
+            <a href="/support/" class="sd-footer__link">Support</a>
+            <a href="/privacy/" class="sd-footer__link">Privacy Policy</a>
+            <a href="/about/" class="sd-footer__link">About</a>
+        </nav>
+
+        {# Version & Meta #}
+        <div class="sd-footer__meta">
+            <span class="sd-footer__status" title="System Status">
+                <span class="sd-footer__status-indicator"></span>
+                <span>Operational</span>
+            </span>
+            <span class="sd-footer__divider">|</span>
+            <span>Version</span>
+            <span class="sd-footer__version">v1.0.0</span>
+        </div>
+    </div>
+</footer>
+
+{# Footer Styles #}
+<style>
+    .sd-footer {
+        background: var(--sd-bg-footer, var(--bg-subtle, #161b22));
+        border-top: 1px solid var(--sd-border-primary, var(--border-default, #30363d));
+        padding: var(--sd-spacing-4, 1rem) 0;
+        margin-top: auto;
+    }
+
+    .sd-footer__container {
+        max-width: var(--sd-container-max-width, 1600px);
+        margin: 0 auto;
+        padding: 0 var(--sd-spacing-6, 1.5rem);
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--sd-spacing-4, 1rem);
+    }
+
+    .sd-footer__copyright {
+        font-size: var(--sd-font-size-sm, 0.875rem);
+        color: var(--sd-text-muted, var(--fg-subtle, #6e7681));
+    }
+
+    .sd-footer__links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--sd-spacing-4, 1rem) var(--sd-spacing-6, 1.5rem);
+    }
+
+    .sd-footer__link {
+        font-size: var(--sd-font-size-sm, 0.875rem);
+        color: var(--sd-text-secondary, var(--fg-muted, #8b949e));
+        text-decoration: none;
+        transition: color var(--sd-transition-fast, 150ms ease);
+    }
+
+    .sd-footer__link:hover {
+        color: var(--sd-accent-primary, var(--accent-fg, #58a6ff));
+    }
+
+    .sd-footer__meta {
+        display: flex;
+        align-items: center;
+        gap: var(--sd-spacing-2, 0.5rem);
+        font-size: var(--sd-font-size-xs, 0.75rem);
+        color: var(--sd-text-muted, var(--fg-subtle, #6e7681));
+    }
+
+    .sd-footer__status {
+        display: flex;
+        align-items: center;
+        gap: var(--sd-spacing-1, 0.25rem);
+    }
+
+    .sd-footer__status-indicator {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background-color: var(--color-success-500, #238636);
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0.5;
+        }
+    }
+
+    .sd-footer__divider {
+        color: var(--sd-border-primary, var(--border-default, #30363d));
+    }
+
+    .sd-footer__version {
+        padding: var(--sd-spacing-1, 0.25rem) var(--sd-spacing-2, 0.5rem);
+        background: var(--sd-bg-tertiary, var(--bg-muted, #21262d));
+        border-radius: var(--sd-radius-sm, 0.25rem);
+        font-family: var(--sd-font-family-mono, monospace);
+        font-size: var(--sd-font-size-xs, 0.75rem);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .sd-footer__container {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .sd-footer__links {
+            justify-content: center;
+        }
+
+        .sd-footer__meta {
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+    }
+
+    /* Print */
+    @media print {
+        .sd-footer {
+            display: none;
+        }
+    }
+</style>
