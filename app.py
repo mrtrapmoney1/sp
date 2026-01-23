@@ -16,6 +16,18 @@ import secrets
 import pandas as pd
 from dbfread import DBF
 import os
+import logging
+
+# Configure logging for debug output
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('servicepower_debug.log'),
+        logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 app.secret_key = secrets.token_hex(16)
@@ -66,7 +78,9 @@ def parse_calls_from_response(response_text: str) -> Tuple[bool, List[Dict], str
         fault = root.find('.//Fault')
         if fault is not None:
             fault_string = fault.find('faultstring')
-            return False, [], fault_string.text if fault_string is not None else 'SOAP Fault'
+            fault_msg = fault_string.text if fault_string is not None else 'SOAP Fault'
+            logger.error(f"SOAP Fault received: {fault_msg}")
+            return False, [], fault_msg
 
         # Check for error
         error_occurred = root.find('.//erroroccurred')
@@ -75,12 +89,19 @@ def parse_calls_from_response(response_text: str) -> Tuple[bool, List[Dict], str
             if error_data is not None:
                 code = error_data.find('Code')
                 desc = error_data.find('Description')
-                error_msg = f"{code.text if code is not None else ''}: {desc.text if desc is not None else ''}"
+                error_code = code.text if code is not None else 'UNKNOWN'
+                error_desc = desc.text if desc is not None else 'Unknown error'
+                error_msg = f"{error_code}: {error_desc}"
+                logger.error(f"ServicePower API Error: Code={error_code}, Description={error_desc}")
                 return False, [], error_msg
+            else:
+                logger.error("ServicePower returned erroroccurred=Y but no errorData")
+                return False, [], "Unknown ServicePower error"
 
         # Extract calls
         calls = []
         call_elements = root.findall('.//CallInfo')
+        logger.debug(f"Found {len(call_elements)} CallInfo elements in response")
 
         for call_elem in call_elements:
             call_data = {}
@@ -97,10 +118,13 @@ def parse_calls_from_response(response_text: str) -> Tuple[bool, List[Dict], str
         # Get number of calls
         num_calls = root.find('.//numberOfCalls')
         num = num_calls.text if num_calls is not None else str(len(calls))
+        logger.info(f"Successfully parsed {num} calls from response")
 
         return True, calls, f"Found {num} calls"
 
     except ET.ParseError as e:
+        logger.error(f"XML Parse Error: {str(e)}")
+        logger.debug(f"Raw response that failed to parse: {response_text[:500]}")
         return False, [], f'XML Parse Error: {str(e)}'
 
 
@@ -109,7 +133,10 @@ def fetch_calls(user_id: str, password: str, servicer_account: str,
                 to_date: str = None) -> Tuple[bool, List[Dict], str]:
     """Fetch calls from ServiceDispatch API"""
 
+    logger.debug(f"fetch_calls called: environment={environment}, days={days}, from_date={from_date}, to_date={to_date}")
+
     if environment not in ENVIRONMENTS:
+        logger.error(f"Invalid environment: {environment}")
         return False, [], f"Invalid environment: {environment}"
 
     base_url = ENVIRONMENTS[environment]
@@ -118,12 +145,18 @@ def fetch_calls(user_id: str, password: str, servicer_account: str,
     if from_date and to_date:
         from_datetime = datetime.strptime(from_date, '%Y-%m-%d').strftime('%m/%d/%Y 00:00:00')
         to_datetime = datetime.strptime(to_date, '%Y-%m-%d').strftime('%m/%d/%Y 23:59:59')
+        logger.debug(f"Using custom date range: from_date={from_date}, to_date={to_date}")
     else:
         days = days or 2
         to_date_obj = datetime.now()
         from_date_obj = to_date_obj - timedelta(days=days)
         from_datetime = from_date_obj.strftime('%m/%d/%Y 00:00:00')
         to_datetime = to_date_obj.strftime('%m/%d/%Y 23:59:59')
+        logger.debug(f"Using days-based range: days={days}")
+
+    logger.info(f"SOAP Request - FromDateTime: {from_datetime}, ToDateTime: {to_datetime}")
+    logger.debug(f"API URL: {base_url}")
+    logger.debug(f"User: {user_id}, ServicerAccount: {servicer_account}")
 
     user_info = create_user_info(user_id, password, servicer_account)
 
@@ -134,6 +167,7 @@ def fetch_calls(user_id: str, password: str, servicer_account: str,
         </urn:getCallInfoSearch>"""
 
     soap_request = create_soap_envelope(body)
+    logger.debug(f"SOAP Request Body (password masked):\n{body.replace(password, '****')}")
 
     try:
         headers = {
@@ -142,12 +176,23 @@ def fetch_calls(user_id: str, password: str, servicer_account: str,
         }
         response = requests.post(base_url, data=soap_request, headers=headers, timeout=30)
 
+        logger.debug(f"HTTP Response Status: {response.status_code}")
+        logger.debug(f"Response length: {len(response.text)} characters")
+
         if response.status_code != 200:
+            logger.error(f"HTTP Error {response.status_code}: {response.text[:500]}")
             return False, [], f"HTTP Error {response.status_code}"
 
-        return parse_calls_from_response(response.text)
+        # Log first part of response for debugging (avoid logging full response for large payloads)
+        logger.debug(f"Response preview: {response.text[:1000]}...")
+
+        success, calls, message = parse_calls_from_response(response.text)
+        logger.info(f"Parse result: success={success}, calls_count={len(calls)}, message={message}")
+
+        return success, calls, message
 
     except requests.exceptions.RequestException as e:
+        logger.error(f"Connection error: {str(e)}")
         return False, [], f"Connection error: {str(e)}"
 
 
@@ -250,23 +295,40 @@ def api_login():
     servicer_account = data.get('servicer_account', '')
     environment = data.get('environment', 'production_na')
 
+    logger.info(f"Login attempt: user={user_id}, environment={environment}")
+
     if not user_id or not password:
+        logger.warning("Login failed: missing credentials")
         return jsonify({'success': False, 'error': 'User ID and Password required'})
 
-    # Test connection with ServicePower
+    # Test connection with ServicePower - use small date range to minimize load
     success, calls, message = fetch_calls(user_id, password, servicer_account, environment, days=1)
 
-    if success:
-        # Store credentials in session
-        session['credentials'] = {
-            'user_id': user_id,
-            'password': password,
-            'servicer_account': servicer_account,
-            'environment': environment
-        }
-        return jsonify({'success': True, 'message': 'Login successful'})
-    else:
+    logger.info(f"Login test result: success={success}, message={message}, calls_found={len(calls)}")
+
+    # Check for authentication-related error messages
+    auth_error_keywords = ['authentication', 'unauthorized', 'invalid', 'credential', 'password', 'user', 'access denied', 'login']
+    message_lower = message.lower()
+    is_auth_error = any(keyword in message_lower for keyword in auth_error_keywords)
+
+    if not success:
+        logger.warning(f"Login failed for user {user_id}: {message}")
         return jsonify({'success': False, 'error': message})
+
+    # Additional check: if success but message indicates an issue
+    if is_auth_error:
+        logger.warning(f"Login failed (auth error detected) for user {user_id}: {message}")
+        return jsonify({'success': False, 'error': message})
+
+    # Store credentials in session
+    session['credentials'] = {
+        'user_id': user_id,
+        'password': password,
+        'servicer_account': servicer_account,
+        'environment': environment
+    }
+    logger.info(f"Login successful for user {user_id}")
+    return jsonify({'success': True, 'message': f'Login successful. Found {len(calls)} calls in last day.'})
 
 
 @app.route('/api/logout', methods=['POST'])
@@ -836,9 +898,13 @@ def get_recommendations():
 
 @app.route('/api/update/bulk', methods=['POST'])
 def update_bulk_status():
-    """Update multiple calls to WAITING ON CUSTOMER status"""
+    """Update multiple calls with specified status"""
     data = request.json
     calls = data.get('calls', [])
+    new_status = data.get('status', 'ACCEPTED')
+    new_substatus = data.get('substatus', 'WAITING ON CUSTOMER')
+
+    logger.info(f"Bulk update request: {len(calls)} calls, status={new_status}, substatus={new_substatus}")
 
     # Get credentials from session
     creds = session.get('credentials', {})
@@ -865,13 +931,15 @@ def update_bulk_status():
         fss_call_id = call.get('FSSCallId', '')
         mfg_id = call.get('MfgId', '')
 
+        logger.debug(f"Updating call {call_number}: status={new_status}, substatus={new_substatus}")
+
         body = f"""        <urn:updateCallInfoObj>
 {user_info}
             <CallNumber>{call_number}</CallNumber>
             <MfgId>{mfg_id}</MfgId>
             <FSSCallId>{fss_call_id}</FSSCallId>
-            <CallStatus>ACCEPTED</CallStatus>
-            <CallSubStatus>WAITING ON CUSTOMER</CallSubStatus>
+            <CallStatus>{new_status}</CallStatus>
+            <CallSubStatus>{new_substatus}</CallSubStatus>
         </urn:updateCallInfoObj>"""
 
         soap_request = create_soap_envelope(body)
@@ -908,8 +976,10 @@ def update_bulk_status():
 
         except Exception as e:
             fail_count += 1
+            logger.error(f"Exception updating call {call_number}: {str(e)}")
             results.append({'call': call_number, 'success': False, 'error': str(e)})
 
+    logger.info(f"Bulk update complete: {success_count} success, {fail_count} failed")
     return jsonify({
         'success': True,
         'message': f'Updated {success_count} calls successfully, {fail_count} failed',

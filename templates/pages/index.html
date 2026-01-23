@@ -324,6 +324,179 @@
             color: var(--text-muted);
         }
 
+        /* Ticket Selection */
+        .ticket-checkbox {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: var(--accent-primary, #4299e1);
+        }
+
+        .ticket-card.selected {
+            border-color: var(--accent-primary, #4299e1);
+            background: var(--accent-subtle, rgba(66, 153, 225, 0.1));
+        }
+
+        /* Actions Toolbar */
+        .actions-toolbar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .select-all-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .select-all-container label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+        }
+
+        .action-btn {
+            padding: 10px 20px;
+            border: 1px solid var(--border-primary, #444);
+            background: var(--bg-secondary, #2d2d2d);
+            color: var(--text-primary);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .action-btn:hover:not(:disabled) {
+            background: var(--accent-primary, #4299e1);
+            border-color: var(--accent-primary, #4299e1);
+            color: white;
+        }
+
+        .action-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .action-btn.export-btn {
+            background: var(--color-info-600, #2563eb);
+            border-color: var(--color-info-600, #2563eb);
+            color: white;
+        }
+
+        .action-btn.export-btn:hover:not(:disabled) {
+            background: var(--color-info-500, #3b82f6);
+        }
+
+        .action-btn.update-btn {
+            background: var(--color-warning-600, #d97706);
+            border-color: var(--color-warning-600, #d97706);
+            color: white;
+        }
+
+        .action-btn.update-btn:hover:not(:disabled) {
+            background: var(--color-warning-500, #f59e0b);
+        }
+
+        .selected-count {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-left: 10px;
+        }
+
+        /* Update Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--bg-elevated, #1e1e1e);
+            border: 1px solid var(--border-primary, #333);
+            border-radius: 12px;
+            padding: 25px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal h3 {
+            margin-bottom: 20px;
+            font-size: 1.25rem;
+        }
+
+        .modal-form-group {
+            margin-bottom: 15px;
+        }
+
+        .modal-form-group label {
+            display: block;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+        }
+
+        .modal-form-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border-primary, #444);
+            background: var(--bg-secondary, #2d2d2d);
+            color: var(--text-primary);
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .modal-btn {
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .modal-btn.cancel {
+            background: var(--bg-secondary, #2d2d2d);
+            border: 1px solid var(--border-primary, #444);
+            color: var(--text-primary);
+        }
+
+        .modal-btn.confirm {
+            background: var(--color-success-500, #38a169);
+            border: none;
+            color: white;
+        }
+
+        .modal-btn:hover {
+            opacity: 0.9;
+        }
+
         /* Footer */
         .dashboard-footer {
             background: var(--bg-secondary, #1a1a1a);
@@ -395,26 +568,28 @@
                 <div>
                     <label style="display:block; margin-bottom:8px; color:var(--text-muted); font-size:0.85rem;">Quick Select</label>
                     <div class="quick-dates">
-                        <button class="date-btn active" data-days="0">Today</button>
+                        <button class="date-btn" data-days="0">Today</button>
                         <button class="date-btn" data-days="1">Yesterday</button>
                         <button class="date-btn" data-days="2">2 Days</button>
                         <button class="date-btn" data-days="5">5 Days</button>
-                        <button class="date-btn" data-days="7">7 Days</button>
+                        <button class="date-btn active" data-days="7">7 Days</button>
                         <button class="date-btn" data-days="30">30 Days</button>
                         <button class="date-btn" data-days="60">60 Days</button>
                     </div>
                 </div>
                 <div class="date-input-group">
                     <div>
-                        <label for="fromDate">From Date</label>
+                        <label for="fromDate">Start Date</label>
                         <input type="date" id="fromDate">
+                        <div id="fromDateDisplay" style="font-size:0.8rem; color:var(--text-muted); margin-top:4px;"></div>
                     </div>
                     <div>
-                        <label for="toDate">To Date</label>
-                        <input type="date" id="toDate">
+                        <label for="toDate">End Date (Today)</label>
+                        <input type="date" id="toDate" readonly style="background:var(--bg-tertiary, #1a1a1a); cursor:not-allowed;">
+                        <div id="toDateDisplay" style="font-size:0.8rem; color:var(--accent-fg, #63b3ed); margin-top:4px;"></div>
                     </div>
                 </div>
-                <button class="load-btn" id="loadBtn" onclick="loadCalls()">Load Calls</button>
+                <button class="load-btn" id="loadBtn" onclick="loadCalls()">Fetch Calls</button>
             </div>
             <div id="status" class="status" style="display:none;"></div>
         </div>
@@ -425,8 +600,61 @@
                 Service Calls
                 <span class="ticket-count" id="ticketCount"></span>
             </h2>
+
+            <!-- Actions Toolbar -->
+            <div class="actions-toolbar" id="actionsToolbar" style="display:none;">
+                <div class="select-all-container">
+                    <input type="checkbox" id="selectAll" class="ticket-checkbox" onchange="toggleSelectAll()">
+                    <label for="selectAll">Select All</label>
+                </div>
+                <span class="selected-count" id="selectedCount">0 selected</span>
+                <button class="action-btn export-btn" id="exportBtn" onclick="exportSelected()" disabled>
+                    <span>📥</span> Export to DBF
+                </button>
+                <button class="action-btn update-btn" id="updateBtn" onclick="showUpdateModal()" disabled>
+                    <span>🔄</span> Update Status
+                </button>
+            </div>
+
             <div class="tickets-grid" id="ticketsContainer">
                 <div class="no-data">Select a date range and click "Load Calls" to view service calls</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Update Status Modal -->
+    <div class="modal-overlay" id="updateModal">
+        <div class="modal">
+            <h3>Update Call Status</h3>
+            <p style="margin-bottom:15px; color:var(--text-muted);">Update <span id="updateCount">0</span> selected call(s)</p>
+
+            <div class="modal-form-group">
+                <label for="newStatus">New Status</label>
+                <select id="newStatus">
+                    <option value="ACCEPTED">ACCEPTED</option>
+                    <option value="OPEN">OPEN</option>
+                    <option value="COMPLETED">COMPLETED</option>
+                    <option value="REJECTED">REJECTED</option>
+                    <option value="RESCHEDULED">RESCHEDULED</option>
+                    <option value="CANCELED">CANCELED</option>
+                </select>
+            </div>
+
+            <div class="modal-form-group">
+                <label for="newSubstatus">Sub-Status</label>
+                <select id="newSubstatus">
+                    <option value="WAITING ON CUSTOMER">WAITING ON CUSTOMER</option>
+                    <option value="WAITING ON PART">WAITING ON PART</option>
+                    <option value="SCHEDULED">SCHEDULED</option>
+                    <option value="IN PROGRESS">IN PROGRESS</option>
+                    <option value="ON HOLD">ON HOLD</option>
+                    <option value="NEEDS AUTHORIZATION">NEEDS AUTHORIZATION</option>
+                </select>
+            </div>
+
+            <div class="modal-actions">
+                <button class="modal-btn cancel" onclick="closeUpdateModal()">Cancel</button>
+                <button class="modal-btn confirm" onclick="updateSelectedCalls()">Update Calls</button>
             </div>
         </div>
     </div>
@@ -438,6 +666,7 @@
 
     <script>
         let allCalls = [];
+        let selectedCalls = new Set();
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
@@ -469,8 +698,33 @@
         function initDates() {
             const today = new Date();
             const todayStr = today.toISOString().split('T')[0];
-            document.getElementById('fromDate').value = todayStr;
+
+            // End date is ALWAYS today (real-time)
             document.getElementById('toDate').value = todayStr;
+            document.getElementById('toDateDisplay').textContent = formatDateDisplay(today);
+
+            // Default start date is 7 days ago
+            const startDate = new Date();
+            startDate.setDate(today.getDate() - 7);
+            const startStr = startDate.toISOString().split('T')[0];
+            document.getElementById('fromDate').value = startStr;
+            document.getElementById('fromDateDisplay').textContent = formatDateDisplay(startDate);
+        }
+
+        function formatDateDisplay(date) {
+            // Format as MM-DD-YYYY for display
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const year = date.getFullYear();
+            return `${month}-${day}-${year}`;
+        }
+
+        function updateEndDateToToday() {
+            // Always update end date to current real-time date
+            const today = new Date();
+            const todayStr = today.toISOString().split('T')[0];
+            document.getElementById('toDate').value = todayStr;
+            document.getElementById('toDateDisplay').textContent = formatDateDisplay(today);
         }
 
         function setupDateButtons() {
@@ -480,15 +734,29 @@
                     document.querySelectorAll('.date-btn').forEach(b => b.classList.remove('active'));
                     this.classList.add('active');
 
-                    // Calculate dates
+                    // Calculate dates - end date is ALWAYS today (real-time)
                     const days = parseInt(this.dataset.days);
                     const today = new Date();
                     const fromDate = new Date();
                     fromDate.setDate(today.getDate() - days);
 
                     document.getElementById('fromDate').value = fromDate.toISOString().split('T')[0];
+                    document.getElementById('fromDateDisplay').textContent = formatDateDisplay(fromDate);
+
+                    // End date always real-time today
                     document.getElementById('toDate').value = today.toISOString().split('T')[0];
+                    document.getElementById('toDateDisplay').textContent = formatDateDisplay(today);
                 });
+            });
+
+            // Update fromDate display when manually changed
+            document.getElementById('fromDate').addEventListener('change', function() {
+                const date = new Date(this.value + 'T00:00:00');
+                document.getElementById('fromDateDisplay').textContent = formatDateDisplay(date);
+                // Clear quick select buttons when custom date chosen
+                document.querySelectorAll('.date-btn').forEach(b => b.classList.remove('active'));
+                // Always ensure end date stays as today
+                updateEndDateToToday();
             });
         }
 
@@ -497,17 +765,20 @@
             const container = document.getElementById('ticketsContainer');
             const loadBtn = document.getElementById('loadBtn');
 
+            // Always update end date to real-time today before fetching
+            updateEndDateToToday();
+
             const fromDate = document.getElementById('fromDate').value;
             const toDate = document.getElementById('toDate').value;
 
             if (!fromDate || !toDate) {
-                showStatus('Please select both From and To dates', 'error');
+                showStatus('Please select a Start Date', 'error');
                 return;
             }
 
             loadBtn.disabled = true;
-            showStatus('Loading service calls...', 'loading');
-            container.innerHTML = '<div class="no-data">Loading...</div>';
+            showStatus('Fetching service calls...', 'loading');
+            container.innerHTML = '<div class="no-data">Fetching calls from ServicePower...</div>';
 
             try {
                 const response = await fetch('/api/calls', {
@@ -545,11 +816,20 @@
 
         function displayCalls(calls) {
             const container = document.getElementById('ticketsContainer');
+            const toolbar = document.getElementById('actionsToolbar');
+
+            // Reset selection
+            selectedCalls.clear();
+            updateSelectionUI();
 
             if (calls.length === 0) {
                 container.innerHTML = '<div class="no-data">No service calls found for selected date range</div>';
+                toolbar.style.display = 'none';
                 return;
             }
+
+            // Show toolbar when calls are loaded
+            toolbar.style.display = 'flex';
 
             // Sort by schedule date (most recent first)
             const sortedCalls = [...calls].sort((a, b) => {
@@ -558,7 +838,7 @@
                 return dateB.localeCompare(dateA);
             });
 
-            container.innerHTML = sortedCalls.map(call => {
+            container.innerHTML = sortedCalls.map((call, index) => {
                 const status = (call.CallStatus || 'UNKNOWN').toUpperCase();
                 const statusClass = getStatusClass(status);
 
@@ -580,9 +860,12 @@
                 const callNumber = call.CallNumber || call.FSSCallId || '-';
 
                 return `
-                    <div class="ticket-card">
+                    <div class="ticket-card" data-index="${index}" onclick="toggleTicketSelection(${index}, event)">
                         <div class="ticket-header">
-                            <span class="ticket-id">#${callNumber}</span>
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <input type="checkbox" class="ticket-checkbox" data-index="${index}" onclick="event.stopPropagation(); toggleTicketSelection(${index}, event)">
+                                <span class="ticket-id">#${callNumber}</span>
+                            </div>
                             <span class="ticket-status ${statusClass}">${status}</span>
                         </div>
                         <div class="ticket-customer">${escapeHtml(customerName)}</div>
@@ -596,6 +879,57 @@
                     </div>
                 `;
             }).join('');
+        }
+
+        function toggleTicketSelection(index, event) {
+            if (selectedCalls.has(index)) {
+                selectedCalls.delete(index);
+            } else {
+                selectedCalls.add(index);
+            }
+            updateSelectionUI();
+        }
+
+        function toggleSelectAll() {
+            const selectAllCheckbox = document.getElementById('selectAll');
+            if (selectAllCheckbox.checked) {
+                // Select all
+                allCalls.forEach((_, index) => selectedCalls.add(index));
+            } else {
+                // Deselect all
+                selectedCalls.clear();
+            }
+            updateSelectionUI();
+        }
+
+        function updateSelectionUI() {
+            const count = selectedCalls.size;
+            document.getElementById('selectedCount').textContent = `${count} selected`;
+            document.getElementById('exportBtn').disabled = count === 0;
+            document.getElementById('updateBtn').disabled = count === 0;
+
+            // Update checkboxes
+            document.querySelectorAll('.ticket-checkbox[data-index]').forEach(cb => {
+                const index = parseInt(cb.dataset.index);
+                cb.checked = selectedCalls.has(index);
+            });
+
+            // Update card styles
+            document.querySelectorAll('.ticket-card[data-index]').forEach(card => {
+                const index = parseInt(card.dataset.index);
+                if (selectedCalls.has(index)) {
+                    card.classList.add('selected');
+                } else {
+                    card.classList.remove('selected');
+                }
+            });
+
+            // Update select all checkbox
+            const selectAllCheckbox = document.getElementById('selectAll');
+            if (allCalls.length > 0) {
+                selectAllCheckbox.checked = selectedCalls.size === allCalls.length;
+                selectAllCheckbox.indeterminate = selectedCalls.size > 0 && selectedCalls.size < allCalls.length;
+            }
         }
 
         function getStatusClass(status) {
@@ -639,6 +973,100 @@
                 await fetch('/api/logout', { method: 'POST' });
             } catch (e) {}
             window.location.href = '/';
+        }
+
+        // Export selected calls to DBF
+        async function exportSelected() {
+            if (selectedCalls.size === 0) {
+                alert('Please select at least one call to export');
+                return;
+            }
+
+            const selectedCallsData = Array.from(selectedCalls).map(index => {
+                const call = allCalls[index];
+                // Generate invoice number (use last 4 digits of call number or index)
+                const callNum = call.CallNumber || call.FSSCallId || '';
+                const invoice = callNum.slice(-5) || String(index + 1).padStart(5, '0');
+                return { ...call, invoice };
+            });
+
+            showStatus('Exporting to DBF...', 'loading');
+
+            try {
+                const response = await fetch('/api/export/dbf', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ calls: selectedCallsData })
+                });
+
+                if (response.ok) {
+                    // Download the file
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `lotus_tickets_${new Date().toISOString().split('T')[0]}.dbf`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    a.remove();
+                    showStatus(`Exported ${selectedCalls.size} calls to DBF`, 'success');
+                } else {
+                    const data = await response.json();
+                    showStatus(data.error || 'Export failed', 'error');
+                }
+            } catch (err) {
+                showStatus('Export error: ' + err.message, 'error');
+            }
+        }
+
+        // Show update modal
+        function showUpdateModal() {
+            if (selectedCalls.size === 0) {
+                alert('Please select at least one call to update');
+                return;
+            }
+            document.getElementById('updateCount').textContent = selectedCalls.size;
+            document.getElementById('updateModal').classList.add('active');
+        }
+
+        function closeUpdateModal() {
+            document.getElementById('updateModal').classList.remove('active');
+        }
+
+        // Update selected calls
+        async function updateSelectedCalls() {
+            const newStatus = document.getElementById('newStatus').value;
+            const newSubstatus = document.getElementById('newSubstatus').value;
+
+            const selectedCallsData = Array.from(selectedCalls).map(index => allCalls[index]);
+
+            closeUpdateModal();
+            showStatus(`Updating ${selectedCalls.size} calls...`, 'loading');
+
+            try {
+                const response = await fetch('/api/update/bulk', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        calls: selectedCallsData,
+                        status: newStatus,
+                        substatus: newSubstatus
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showStatus(data.message, 'success');
+                    // Refresh calls after update
+                    setTimeout(() => loadCalls(), 1500);
+                } else {
+                    showStatus(data.error || 'Update failed', 'error');
+                }
+            } catch (err) {
+                showStatus('Update error: ' + err.message, 'error');
+            }
         }
     </script>
 </body>

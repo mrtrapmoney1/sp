@@ -8,7 +8,9 @@
       "Bash(git add:*)",
       "Bash(git config:*)",
       "Bash(python3:*)",
-      "Bash(pip3 install:*)"
+      "Bash(pip3 install:*)",
+      "Bash(file:*)",
+      "Bash(xxd:*)"
     ]
   }
 }
