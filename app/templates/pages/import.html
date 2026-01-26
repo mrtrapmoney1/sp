@@ -1,0 +1,486 @@
+{% extends "base/layout.html" %}
+
+{% block title %}Import - ServiceDispatch{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Import Calls</h1>
+    <p class="text-muted">Upload ServicePower PDFs or Excel files to convert to Lotus-compatible DBF format</p>
+</div>
+
+<div class="grid grid-cols-2 gap-2">
+    <!-- PDF Upload Section -->
+    <div class="card">
+        <div class="card__header">
+            <h3>Import ServicePower PDF</h3>
+        </div>
+        <div class="card__body">
+            <p class="text-muted mb-2">Upload a ServicePower work order PDF (like SA-1831469.pdf) to extract call data.</p>
+
+            <div class="upload-zone" id="pdf-upload-zone">
+                <input type="file" id="pdf-file" accept=".pdf" style="display: none;" onchange="handlePdfUpload(event)">
+                <div class="upload-zone__content" onclick="document.getElementById('pdf-file').click()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="upload-zone__icon">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="12" y1="18" x2="12" y2="12"></line>
+                        <line x1="9" y1="15" x2="15" y2="15"></line>
+                    </svg>
+                    <p>Click to select a PDF file</p>
+                    <p class="text-muted">or drag and drop</p>
+                </div>
+            </div>
+
+            <div id="pdf-result" class="mt-2" style="display: none;">
+                <h4>Extracted Call Data</h4>
+                <div id="pdf-call-data" class="call-preview"></div>
+                <div class="flex gap-1 mt-1">
+                    <button class="btn btn-primary" onclick="exportPdfCall()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        Export to Lotus DBF
+                    </button>
+                    <button class="btn btn-outline" onclick="clearPdfResult()">Clear</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Excel Upload Section -->
+    <div class="card">
+        <div class="card__header">
+            <h3>Import Excel/CSV</h3>
+        </div>
+        <div class="card__body">
+            <p class="text-muted mb-2">Upload an Excel or CSV file with multiple call records.</p>
+
+            <div class="upload-zone" id="excel-upload-zone">
+                <input type="file" id="excel-file" accept=".xlsx,.xls,.csv" style="display: none;" onchange="handleExcelUpload(event)">
+                <div class="upload-zone__content" onclick="document.getElementById('excel-file').click()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="upload-zone__icon">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="8" y1="13" x2="16" y2="13"></line>
+                        <line x1="8" y1="17" x2="16" y2="17"></line>
+                    </svg>
+                    <p>Click to select an Excel or CSV file</p>
+                    <p class="text-muted">or drag and drop</p>
+                </div>
+            </div>
+
+            <div id="excel-result" class="mt-2" style="display: none;">
+                <h4>Imported Calls (<span id="excel-count">0</span>)</h4>
+                <div id="excel-calls-table" class="table-container" style="max-height: 300px; overflow-y: auto;"></div>
+                <div class="flex gap-1 mt-1">
+                    <button class="btn btn-primary" onclick="exportExcelCalls()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        Export All to Lotus DBF
+                    </button>
+                    <button class="btn btn-outline" onclick="clearExcelResult()">Clear</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Field Mapping Reference -->
+<div class="card mt-2">
+    <div class="card__header">
+        <h3>Lotus DBF Field Mapping</h3>
+    </div>
+    <div class="card__body">
+        <p class="text-muted mb-1">The following fields are exported to the Lotus-compatible DBF format:</p>
+        <div class="grid grid-cols-3 gap-1">
+            <div>
+                <strong>Customer Info</strong>
+                <ul class="text-sm">
+                    <li>INVOICE - Invoice number</li>
+                    <li>LASTNAME - Last name</li>
+                    <li>FIRSTNAME - First name</li>
+                    <li>ADDRESS - Street address</li>
+                    <li>CITY - City</li>
+                    <li>STATE - State (2 letters)</li>
+                    <li>ZIP - ZIP code</li>
+                </ul>
+            </div>
+            <div>
+                <strong>Contact & Location</strong>
+                <ul class="text-sm">
+                    <li>PHONE - Primary phone</li>
+                    <li>PHONE2 - Alt phone</li>
+                    <li>LOCATION - Service location</li>
+                    <li>TICLOC - Ticket location</li>
+                    <li>BTADDRESS - Call number (SA-*)</li>
+                    <li>DLRINVOICE - Case/dealer invoice</li>
+                    <li>ACCESSOR - Warranty type</li>
+                </ul>
+            </div>
+            <div>
+                <strong>Product & Service</strong>
+                <ul class="text-sm">
+                    <li>SERVICEREQ - Service request/problem</li>
+                    <li>MAKE - Brand/manufacturer</li>
+                    <li>TYP - Product type</li>
+                    <li>MODEL - Model number</li>
+                    <li>SERIAL - Serial number</li>
+                    <li>DATEIN - Date received</li>
+                    <li>DATEPUR - Purchase date</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.upload-zone {
+    border: 2px dashed var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: var(--color-bg-muted);
+}
+
+.upload-zone:hover,
+.upload-zone.dragover {
+    border-color: var(--color-primary);
+    background: var(--color-bg-card);
+}
+
+.upload-zone__icon {
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-3);
+}
+
+.upload-zone__content p {
+    margin: var(--space-2) 0;
+}
+
+.call-preview {
+    background: var(--color-bg-muted);
+    border-radius: var(--radius-md);
+    padding: var(--space-3);
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.call-preview .field {
+    display: flex;
+    padding: var(--space-2) 0;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.call-preview .field:last-child {
+    border-bottom: none;
+}
+
+.call-preview .field-name {
+    width: 120px;
+    font-weight: 600;
+    color: var(--color-text-muted);
+}
+
+.call-preview .field-value {
+    flex: 1;
+    color: var(--color-text);
+}
+
+.text-sm {
+    font-size: 0.85rem;
+}
+
+.text-sm li {
+    padding: 2px 0;
+}
+
+.page-header {
+    margin-bottom: var(--space-5);
+}
+
+.page-header h1 {
+    font-size: 1.75rem;
+    margin-bottom: var(--space-2);
+}
+
+.grid-cols-2 {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.grid-cols-3 {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+@media (max-width: 768px) {
+    .grid-cols-2,
+    .grid-cols-3 {
+        grid-template-columns: 1fr;
+    }
+}
+
+.loading-spinner {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    border: 3px solid var(--color-border);
+    border-top-color: var(--color-primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+.table-container {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+}
+</style>
+
+<script>
+let pdfCallData = null;
+let excelCallsData = [];
+
+// Drag and drop support
+['pdf-upload-zone', 'excel-upload-zone'].forEach(zoneId => {
+    const zone = document.getElementById(zoneId);
+
+    zone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        zone.classList.add('dragover');
+    });
+
+    zone.addEventListener('dragleave', () => {
+        zone.classList.remove('dragover');
+    });
+
+    zone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        zone.classList.remove('dragover');
+
+        const file = e.dataTransfer.files[0];
+        if (file) {
+            if (zoneId === 'pdf-upload-zone' && file.name.toLowerCase().endsWith('.pdf')) {
+                uploadPdf(file);
+            } else if (zoneId === 'excel-upload-zone' &&
+                      (file.name.toLowerCase().endsWith('.xlsx') ||
+                       file.name.toLowerCase().endsWith('.xls') ||
+                       file.name.toLowerCase().endsWith('.csv'))) {
+                uploadExcel(file);
+            } else {
+                showError('Invalid file type');
+            }
+        }
+    });
+});
+
+function handlePdfUpload(event) {
+    const file = event.target.files[0];
+    if (file) {
+        uploadPdf(file);
+    }
+}
+
+async function uploadPdf(file) {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+        showLoading('pdf-upload-zone');
+
+        const response = await fetch('/api/import/pdf', {
+            method: 'POST',
+            body: formData
+        });
+
+        const result = await response.json();
+        hideLoading('pdf-upload-zone');
+
+        if (result.success) {
+            pdfCallData = result.call;
+            displayPdfResult(result.call);
+        } else {
+            showError(result.error || 'Failed to parse PDF');
+        }
+    } catch (err) {
+        hideLoading('pdf-upload-zone');
+        showError('Error uploading file: ' + err.message);
+    }
+}
+
+function displayPdfResult(call) {
+    const container = document.getElementById('pdf-call-data');
+    let html = '';
+
+    const fields = [
+        'BTADDRESS', 'DLRINVOICE', 'FIRSTNAME', 'LASTNAME',
+        'ADDRESS', 'CITY', 'STATE', 'ZIP', 'PHONE', 'PHONE2',
+        'MAKE', 'TYP', 'MODEL', 'SERIAL', 'SERVICEREQ',
+        'DATEIN', 'ACCESSOR'
+    ];
+
+    fields.forEach(field => {
+        const value = call[field] || '';
+        html += `<div class="field">
+            <span class="field-name">${field}</span>
+            <span class="field-value">${escapeHtml(value)}</span>
+        </div>`;
+    });
+
+    container.innerHTML = html;
+    document.getElementById('pdf-result').style.display = 'block';
+}
+
+function clearPdfResult() {
+    pdfCallData = null;
+    document.getElementById('pdf-result').style.display = 'none';
+    document.getElementById('pdf-file').value = '';
+}
+
+async function exportPdfCall() {
+    if (!pdfCallData) return;
+
+    try {
+        const response = await fetch('/api/import/export-dbf', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ calls: [pdfCallData] })
+        });
+
+        if (response.ok) {
+            const blob = await response.blob();
+            downloadBlob(blob, 'imported-call.dbf');
+        } else {
+            const result = await response.json();
+            showError(result.error || 'Export failed');
+        }
+    } catch (err) {
+        showError('Error exporting: ' + err.message);
+    }
+}
+
+function handleExcelUpload(event) {
+    const file = event.target.files[0];
+    if (file) {
+        uploadExcel(file);
+    }
+}
+
+async function uploadExcel(file) {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+        showLoading('excel-upload-zone');
+
+        const response = await fetch('/api/import/excel', {
+            method: 'POST',
+            body: formData
+        });
+
+        const result = await response.json();
+        hideLoading('excel-upload-zone');
+
+        if (result.success) {
+            excelCallsData = result.calls;
+            displayExcelResult(result.calls);
+        } else {
+            showError(result.error || 'Failed to parse Excel');
+        }
+    } catch (err) {
+        hideLoading('excel-upload-zone');
+        showError('Error uploading file: ' + err.message);
+    }
+}
+
+function displayExcelResult(calls) {
+    document.getElementById('excel-count').textContent = calls.length;
+
+    const container = document.getElementById('excel-calls-table');
+    let html = '<table class="table"><thead><tr>';
+    html += '<th>Call #</th><th>Name</th><th>Address</th><th>Brand</th><th>Model</th>';
+    html += '</tr></thead><tbody>';
+
+    calls.forEach(call => {
+        html += `<tr>
+            <td>${escapeHtml(call.BTADDRESS || call.DLRINVOICE || '-')}</td>
+            <td>${escapeHtml((call.FIRSTNAME + ' ' + call.LASTNAME).trim() || '-')}</td>
+            <td>${escapeHtml(call.CITY || '-')}, ${escapeHtml(call.STATE || '-')}</td>
+            <td>${escapeHtml(call.MAKE || '-')}</td>
+            <td>${escapeHtml(call.MODEL || '-')}</td>
+        </tr>`;
+    });
+
+    html += '</tbody></table>';
+    container.innerHTML = html;
+    document.getElementById('excel-result').style.display = 'block';
+}
+
+function clearExcelResult() {
+    excelCallsData = [];
+    document.getElementById('excel-result').style.display = 'none';
+    document.getElementById('excel-file').value = '';
+}
+
+async function exportExcelCalls() {
+    if (!excelCallsData.length) return;
+
+    try {
+        const response = await fetch('/api/import/export-dbf', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ calls: excelCallsData })
+        });
+
+        if (response.ok) {
+            const blob = await response.blob();
+            downloadBlob(blob, 'imported-calls.dbf');
+        } else {
+            const result = await response.json();
+            showError(result.error || 'Export failed');
+        }
+    } catch (err) {
+        showError('Error exporting: ' + err.message);
+    }
+}
+
+function downloadBlob(blob, filename) {
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    a.remove();
+}
+
+function showLoading(zoneId) {
+    const zone = document.getElementById(zoneId);
+    zone.innerHTML = `<div class="upload-zone__content">
+        <div class="loading-spinner"></div>
+        <p>Processing file...</p>
+    </div>`;
+}
+
+function hideLoading(zoneId) {
+    location.reload();
+}
+
+function showError(message) {
+    alert(message); // Could be replaced with a toast notification
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+</script>
+{% endblock %}

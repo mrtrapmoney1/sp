@@ -1,0 +1,316 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Analytics{% endblock %}
+{% block header_title %}Analytics Dashboard{% endblock %}
+
+{% block head_extra %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block extra_styles %}
+.analytics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 20px;
+}
+
+.chart-container {
+    position: relative;
+    height: 300px;
+}
+
+.analytics-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.summary-stat {
+    background: var(--color-bg-card);
+    padding: 20px;
+    border-radius: var(--radius-md);
+    text-align: center;
+    box-shadow: var(--shadow-sm);
+}
+
+.summary-stat__value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--color-primary);
+}
+
+.summary-stat__label {
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+    margin-top: 5px;
+}
+
+.top-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.top-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.top-list li:last-child {
+    border-bottom: none;
+}
+
+.top-list .rank {
+    width: 30px;
+    height: 30px;
+    background: var(--color-primary);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.85rem;
+    margin-right: 10px;
+}
+
+.top-list .name {
+    flex: 1;
+}
+
+.top-list .count {
+    font-weight: 600;
+    color: var(--color-primary);
+}
+{% endblock %}
+
+{% block content %}
+<div class="analytics-summary" id="summary-container">
+    <div class="summary-stat">
+        <div class="summary-stat__value" id="total-records">-</div>
+        <div class="summary-stat__label">Total Records</div>
+    </div>
+    <div class="summary-stat">
+        <div class="summary-stat__value" id="unique-makes">-</div>
+        <div class="summary-stat__label">Unique Makes</div>
+    </div>
+    <div class="summary-stat">
+        <div class="summary-stat__value" id="unique-models">-</div>
+        <div class="summary-stat__label">Unique Models</div>
+    </div>
+    <div class="summary-stat">
+        <div class="summary-stat__value" id="unique-cities">-</div>
+        <div class="summary-stat__label">Service Areas</div>
+    </div>
+</div>
+
+<div class="analytics-grid">
+    <div class="card">
+        <div class="card__header">
+            <h2 class="card__title">Top Brands Serviced</h2>
+        </div>
+        <div class="chart-container">
+            <canvas id="brands-chart"></canvas>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card__header">
+            <h2 class="card__title">Product Types</h2>
+        </div>
+        <div class="chart-container">
+            <canvas id="products-chart"></canvas>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card__header">
+            <h2 class="card__title">Most Common Parts</h2>
+        </div>
+        <ul class="top-list" id="top-parts-list">
+            <li class="text-center text-muted">Loading...</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <div class="card__header">
+            <h2 class="card__title">Common Problems</h2>
+        </div>
+        <ul class="top-list" id="top-problems-list">
+            <li class="text-center text-muted">Loading...</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <div class="card__header">
+            <h2 class="card__title">Top Service Areas</h2>
+        </div>
+        <ul class="top-list" id="top-cities-list">
+            <li class="text-center text-muted">Loading...</li>
+        </ul>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+let brandsChart, productsChart;
+
+async function loadAnalytics() {
+    try {
+        // Load parts analytics
+        const partsResponse = await fetch('/api/parts/analytics', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({})
+        });
+        const partsData = await partsResponse.json();
+
+        if (partsData.success) {
+            renderPartsAnalytics(partsData.analytics);
+        }
+
+        // Load customer analytics
+        const customerResponse = await fetch('/api/customer/analytics', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({})
+        });
+        const customerData = await customerResponse.json();
+
+        if (customerData.success) {
+            renderCustomerAnalytics(customerData.analytics);
+        }
+    } catch (err) {
+        console.error('Analytics error:', err);
+    }
+}
+
+function renderPartsAnalytics(analytics) {
+    // Update summary stats
+    document.getElementById('total-records').textContent = (analytics.total_records || 0).toLocaleString();
+    document.getElementById('unique-makes').textContent = analytics.unique_makes || 0;
+    document.getElementById('unique_models').textContent = analytics.unique_models || 0;
+
+    // Render top parts
+    const partsList = document.getElementById('top-parts-list');
+    if (analytics.most_common_parts && analytics.most_common_parts.length > 0) {
+        partsList.innerHTML = analytics.most_common_parts.slice(0, 10).map((item, idx) => `
+            <li>
+                <span class="rank">${idx + 1}</span>
+                <span class="name">${item.part}</span>
+                <span class="count">${item.count}</span>
+            </li>
+        `).join('');
+    } else {
+        partsList.innerHTML = '<li class="text-center text-muted">No data available</li>';
+    }
+
+    // Render common problems
+    const problemsList = document.getElementById('top-problems-list');
+    if (analytics.common_problems && analytics.common_problems.length > 0) {
+        problemsList.innerHTML = analytics.common_problems.slice(0, 10).map((item, idx) => `
+            <li>
+                <span class="rank">${idx + 1}</span>
+                <span class="name">${truncate(item.problem, 40)}</span>
+                <span class="count">${item.count}</span>
+            </li>
+        `).join('');
+    } else {
+        problemsList.innerHTML = '<li class="text-center text-muted">No data available</li>';
+    }
+}
+
+function renderCustomerAnalytics(analytics) {
+    // Update summary
+    document.getElementById('unique-cities').textContent = analytics.unique_cities || 0;
+
+    // Render brands chart
+    if (analytics.top_makes && analytics.top_makes.length > 0) {
+        const labels = analytics.top_makes.map(m => m.make);
+        const data = analytics.top_makes.map(m => m.count);
+
+        if (brandsChart) brandsChart.destroy();
+        brandsChart = new Chart(document.getElementById('brands-chart'), {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Service Calls',
+                    data: data,
+                    backgroundColor: 'rgba(26, 54, 93, 0.8)',
+                    borderColor: 'rgba(26, 54, 93, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    }
+
+    // Render products chart
+    if (analytics.top_product_types && analytics.top_product_types.length > 0) {
+        const labels = analytics.top_product_types.map(p => p.type);
+        const data = analytics.top_product_types.map(p => p.count);
+
+        const colors = [
+            '#1a365d', '#2c5282', '#3182ce', '#4299e1', '#63b3ed',
+            '#48bb78', '#ed8936', '#fc8181', '#9f7aea', '#667eea'
+        ];
+
+        if (productsChart) productsChart.destroy();
+        productsChart = new Chart(document.getElementById('products-chart'), {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: data,
+                    backgroundColor: colors.slice(0, data.length)
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right'
+                    }
+                }
+            }
+        });
+    }
+
+    // Render top cities
+    const citiesList = document.getElementById('top-cities-list');
+    if (analytics.top_cities && analytics.top_cities.length > 0) {
+        citiesList.innerHTML = analytics.top_cities.slice(0, 10).map((item, idx) => `
+            <li>
+                <span class="rank">${idx + 1}</span>
+                <span class="name">${item.city}</span>
+                <span class="count">${item.count}</span>
+            </li>
+        `).join('');
+    } else {
+        citiesList.innerHTML = '<li class="text-center text-muted">No data available</li>';
+    }
+}
+
+function truncate(str, len) {
+    if (!str) return '';
+    return str.length > len ? str.substring(0, len) + '...' : str;
+}
+
+// Load analytics on page load
+loadAnalytics();
+{% endblock %}

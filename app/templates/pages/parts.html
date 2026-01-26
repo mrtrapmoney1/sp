@@ -1,0 +1,317 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Parts Lookup{% endblock %}
+{% block header_title %}Parts Lookup{% endblock %}
+
+{% block extra_styles %}
+.search-form {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.results-container {
+    margin-top: 20px;
+}
+
+.part-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.part-card:last-child {
+    border-bottom: none;
+}
+
+.part-info h4 {
+    margin: 0 0 5px 0;
+    color: var(--color-primary);
+}
+
+.part-info p {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+}
+
+.part-stats {
+    text-align: right;
+}
+
+.part-stats .frequency {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-primary);
+}
+
+.part-stats .label {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+}
+
+.confidence-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: var(--radius-sm);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.confidence-badge--high { background: var(--color-success); color: white; }
+.confidence-badge--medium { background: var(--color-warning); color: white; }
+.confidence-badge--low { background: var(--color-danger); color: white; }
+
+.recommendations {
+    background: rgba(72, 187, 120, 0.1);
+    border: 1px solid var(--color-success);
+    border-radius: var(--radius-md);
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.recommendations h3 {
+    margin: 0 0 15px 0;
+    color: #276749;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.history-table {
+    max-height: 500px;
+    overflow-y: auto;
+}
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card__header">
+        <h2 class="card__title">Parts Search</h2>
+    </div>
+
+    <div class="search-form">
+        <div class="form-group">
+            <label class="form-label" for="make">Make/Brand</label>
+            <input type="text" id="make" class="form-control" placeholder="e.g., WHIRLPOOL, LG">
+        </div>
+        <div class="form-group">
+            <label class="form-label" for="model">Model Number</label>
+            <input type="text" id="model" class="form-control" placeholder="e.g., WTW5000DW">
+        </div>
+        <div class="form-group">
+            <label class="form-label" for="problem">Problem/Symptom</label>
+            <input type="text" id="problem" class="form-control" placeholder="e.g., not draining, noisy">
+        </div>
+        <div class="form-group" style="display: flex; align-items: flex-end;">
+            <button class="btn btn-primary" onclick="searchParts()" style="width: 100%;">
+                Search Parts
+            </button>
+        </div>
+    </div>
+</div>
+
+<div id="recommendations-container"></div>
+
+<div class="card" id="results-card" style="display: none;">
+    <div class="card__header">
+        <h2 class="card__title">Search Results</h2>
+        <span id="results-count" class="text-muted"></span>
+    </div>
+
+    <div id="results-container" class="results-container"></div>
+</div>
+
+<div class="card">
+    <div class="card__header">
+        <h2 class="card__title">Parts History</h2>
+        <div class="flex gap-1">
+            <input type="text" id="history-search" class="form-control" placeholder="Search history..." style="width: 200px;"
+                   hx-get="/partials/parts-results"
+                   hx-trigger="keyup changed delay:500ms"
+                   hx-target="#history-table-container"
+                   hx-include="this">
+        </div>
+    </div>
+
+    <div id="history-table-container"
+         hx-get="/api/parts/history"
+         hx-trigger="load"
+         hx-target="this"
+         class="history-table">
+        <div class="text-center text-muted">
+            <span class="spinner"></span> Loading history...
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+async function searchParts() {
+    const make = document.getElementById('make').value.trim();
+    const model = document.getElementById('model').value.trim();
+    const problem = document.getElementById('problem').value.trim();
+
+    if (!make && !model && !problem) {
+        alert('Please enter at least one search criteria');
+        return;
+    }
+
+    const resultsCard = document.getElementById('results-card');
+    const resultsContainer = document.getElementById('results-container');
+    const recommendationsContainer = document.getElementById('recommendations-container');
+
+    resultsContainer.innerHTML = '<div class="text-center"><span class="spinner"></span> Searching...</div>';
+    resultsCard.style.display = 'block';
+
+    try {
+        const response = await fetch('/api/parts/recommendations', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ make, model, problem })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            renderRecommendations(data, recommendationsContainer);
+            renderResults(data, resultsContainer);
+        } else {
+            resultsContainer.innerHTML = `<div class="alert alert-danger">${data.error || 'Search failed'}</div>`;
+        }
+    } catch (err) {
+        resultsContainer.innerHTML = `<div class="alert alert-danger">Error: ${err.message}</div>`;
+    }
+}
+
+function renderRecommendations(data, container) {
+    if (!data.recommendations || data.recommendations.length === 0) {
+        container.innerHTML = '';
+        return;
+    }
+
+    const confidence = data.confidence || 'low';
+    const confidenceClass = `confidence-badge--${confidence}`;
+
+    let html = `
+        <div class="recommendations">
+            <h3>
+                Recommended Parts
+                <span class="confidence-badge ${confidenceClass}">${confidence} confidence</span>
+            </h3>
+            <p class="text-muted mb-2">Based on ${data.total_matches || 0} similar service records</p>
+    `;
+
+    data.recommendations.forEach(rec => {
+        html += `
+            <div class="part-card">
+                <div class="part-info">
+                    <h4>${rec.part_number}</h4>
+                    <p>${rec.description || 'No description'}</p>
+                </div>
+                <div class="part-stats">
+                    <div class="frequency">${rec.frequency}</div>
+                    <div class="label">times used (${rec.success_rate})</div>
+                </div>
+            </div>
+        `;
+    });
+
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+function renderResults(data, container) {
+    if (!data.recommendations || data.recommendations.length === 0) {
+        container.innerHTML = '<div class="text-center text-muted">No matching parts found. Try broader search criteria.</div>';
+        document.getElementById('results-count').textContent = '';
+        return;
+    }
+
+    document.getElementById('results-count').textContent = `${data.recommendations.length} parts found`;
+
+    let html = '';
+    data.recommendations.forEach(rec => {
+        html += `
+            <div class="part-card">
+                <div class="part-info">
+                    <h4>${rec.part_number}</h4>
+                    <p>${rec.description || 'No description available'}</p>
+                </div>
+                <div class="part-stats">
+                    <div class="frequency">${rec.frequency}</div>
+                    <div class="label">occurrences</div>
+                </div>
+            </div>
+        `;
+    });
+
+    container.innerHTML = html;
+}
+
+async function loadPartsHistory() {
+    const search = document.getElementById('history-search').value;
+    const container = document.getElementById('history-table-container');
+
+    try {
+        const response = await fetch('/api/parts/history', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ search })
+        });
+
+        const data = await response.json();
+
+        if (data.success && data.parts && data.parts.length > 0) {
+            let html = `
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Make</th>
+                            <th>Model</th>
+                            <th>Part 1</th>
+                            <th>Part 2</th>
+                            <th>Part 3</th>
+                            <th>Symptom</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            data.parts.slice(0, 100).forEach(part => {
+                html += `
+                    <tr>
+                        <td>${part.MAKE || ''}</td>
+                        <td>${part.MODEL || ''}</td>
+                        <td>${part.P1 || ''}</td>
+                        <td>${part.P2 || ''}</td>
+                        <td>${part.P3 || ''}</td>
+                        <td>${part.SYMPT || part.SERVICEREQ || ''}</td>
+                    </tr>
+                `;
+            });
+
+            html += '</tbody></table>';
+            html += `<p class="text-muted text-center mt-2">Showing ${Math.min(100, data.parts.length)} of ${data.total_records} records</p>`;
+            container.innerHTML = html;
+        } else {
+            container.innerHTML = '<div class="text-center text-muted">No parts history found</div>';
+        }
+    } catch (err) {
+        container.innerHTML = `<div class="alert alert-danger">Error loading history: ${err.message}</div>`;
+    }
+}
+
+// Load history on page load
+loadPartsHistory();
+
+// Bind search input
+document.getElementById('history-search').addEventListener('input', () => {
+    clearTimeout(window.searchTimeout);
+    window.searchTimeout = setTimeout(loadPartsHistory, 500);
+});
+{% endblock %}

@@ -1,0 +1,933 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Tickets{% endblock %}
+{% block header_title %}Ticket Management{% endblock %}
+
+{% block extra_styles %}
+/* Ticket Lookup Section - Prominent at top */
+.ticket-lookup {
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+    color: white;
+    border-radius: var(--radius-lg);
+    padding: 25px;
+    margin-bottom: 25px;
+    box-shadow: var(--shadow-md);
+}
+
+.ticket-lookup__header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.ticket-lookup__header h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.ticket-lookup__icon {
+    width: 32px;
+    height: 32px;
+    background: rgba(255,255,255,0.2);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ticket-lookup__form {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+}
+
+.ticket-lookup__input-group {
+    flex: 1;
+    min-width: 280px;
+}
+
+.ticket-lookup__input-group label {
+    display: block;
+    font-size: 0.875rem;
+    margin-bottom: 6px;
+    opacity: 0.9;
+}
+
+.ticket-lookup__input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: var(--radius-md);
+    background: rgba(255,255,255,0.1);
+    color: white;
+    font-size: 1rem;
+    transition: all 0.2s;
+}
+
+.ticket-lookup__input::placeholder {
+    color: rgba(255,255,255,0.6);
+}
+
+.ticket-lookup__input:focus {
+    outline: none;
+    border-color: white;
+    background: rgba(255,255,255,0.15);
+}
+
+.ticket-lookup__btn {
+    background: white;
+    color: var(--color-primary);
+    padding: 12px 24px;
+    border: none;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ticket-lookup__btn:hover {
+    background: rgba(255,255,255,0.9);
+    transform: translateY(-1px);
+}
+
+.ticket-lookup__btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.ticket-lookup__help {
+    font-size: 0.8rem;
+    opacity: 0.8;
+    margin-top: 10px;
+}
+
+/* Search Results Section */
+.search-results {
+    display: none;
+    margin-bottom: 25px;
+}
+
+.search-results.active {
+    display: block;
+}
+
+.search-results__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.search-results__count {
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+}
+
+.search-results__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.search-results__table th,
+.search-results__table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.search-results__table th {
+    font-weight: 600;
+    background: var(--color-bg);
+    position: sticky;
+    top: 0;
+}
+
+.search-results__table tbody tr {
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.search-results__table tbody tr:hover {
+    background: rgba(26, 54, 93, 0.08);
+}
+
+.search-results__table tbody tr.selected {
+    background: rgba(26, 54, 93, 0.12);
+    border-left: 3px solid var(--color-primary);
+}
+
+.search-results__empty {
+    text-align: center;
+    padding: 40px;
+    color: var(--color-text-muted);
+}
+
+/* Ticket Form Styles */
+.ticket-form {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.form-section {
+    background: var(--color-bg);
+    padding: 20px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
+}
+
+.form-section h3 {
+    margin: 0 0 15px 0;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--color-primary);
+    color: var(--color-primary);
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.form-section__icon {
+    width: 20px;
+    height: 20px;
+    opacity: 0.8;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 15px;
+}
+
+.ticket-preview {
+    background: var(--color-bg);
+    padding: 20px;
+    border-radius: var(--radius-md);
+    font-family: 'Cascadia Code', Consolas, monospace;
+    font-size: 0.85rem;
+    white-space: pre-wrap;
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid var(--color-border);
+}
+
+.ticket-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+    padding-top: 20px;
+    border-top: 1px solid var(--color-border);
+}
+
+/* Badge for loaded ticket */
+.ticket-loaded-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--color-success);
+    color: white;
+    padding: 4px 12px;
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+/* Table container for scrolling */
+.table-container {
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+}
+
+/* Status badges */
+.status-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 6px;
+}
+
+.status-indicator--active { background: var(--color-success); }
+.status-indicator--pending { background: var(--color-warning); }
+.status-indicator--closed { background: var(--color-text-muted); }
+{% endblock %}
+
+{% block content %}
+<!-- Ticket Lookup Section -->
+<div class="ticket-lookup">
+    <div class="ticket-lookup__header">
+        <div class="ticket-lookup__icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <path d="m21 21-4.3-4.3"></path>
+            </svg>
+        </div>
+        <h2>Find Existing Ticket</h2>
+    </div>
+    <form id="lookup-form" class="ticket-lookup__form" onsubmit="lookupTicket(event)">
+        <div class="ticket-lookup__input-group">
+            <label for="lookup-reference">Search by Invoice, Call Number, Name, or Phone</label>
+            <input
+                type="text"
+                id="lookup-reference"
+                name="reference"
+                class="ticket-lookup__input"
+                placeholder="e.g., 12345, C12345678, Smith, 402-555-1234"
+                autocomplete="off"
+            >
+        </div>
+        <button type="submit" class="ticket-lookup__btn" id="lookup-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <path d="m21 21-4.3-4.3"></path>
+            </svg>
+            Search
+        </button>
+    </form>
+    <p class="ticket-lookup__help">Search the Lotus database to find and load existing ticket data into the form below.</p>
+</div>
+
+<!-- Search Results Section -->
+<div class="card search-results" id="search-results">
+    <div class="card__header search-results__header">
+        <h2 class="card__title">Search Results</h2>
+        <span class="search-results__count" id="results-count">0 tickets found</span>
+    </div>
+    <div id="results-container">
+        <!-- Results will be populated here -->
+    </div>
+</div>
+
+<!-- Create/Edit Ticket Form -->
+<div class="card">
+    <div class="card__header">
+        <div class="flex items-center gap-2">
+            <h2 class="card__title" id="form-title">Create New Ticket</h2>
+            <span id="loaded-ticket-badge" class="ticket-loaded-badge" style="display: none;">
+                <span class="status-indicator status-indicator--active"></span>
+                Editing: <span id="loaded-ticket-id"></span>
+            </span>
+        </div>
+        <button type="button" class="btn btn-outline" onclick="clearForm()" id="clear-btn" style="display: none;">
+            Clear & Start New
+        </button>
+    </div>
+
+    <form id="ticket-form">
+        <div class="ticket-form">
+            <!-- Customer Information Section -->
+            <div class="form-section">
+                <h3>
+                    <svg class="form-section__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    Customer Information
+                </h3>
+                <div class="form-group">
+                    <label class="form-label" for="lastname">Last Name *</label>
+                    <input type="text" id="lastname" name="lastname" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="firstname">First Name</label>
+                    <input type="text" id="firstname" name="firstname" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="address">Address</label>
+                    <input type="text" id="address" name="address" class="form-control">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="city">City</label>
+                        <input type="text" id="city" name="city" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="state">State</label>
+                        <input type="text" id="state" name="state" class="form-control" maxlength="2" placeholder="NE">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="zip">ZIP</label>
+                        <input type="text" id="zip" name="zip" class="form-control" maxlength="5">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="phone">Phone</label>
+                        <input type="tel" id="phone" name="phone" class="form-control" placeholder="402-555-1234">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="phone2">Phone 2</label>
+                        <input type="tel" id="phone2" name="phone2" class="form-control">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product Information Section -->
+            <div class="form-section">
+                <h3>
+                    <svg class="form-section__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                        <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                    </svg>
+                    Product Information
+                </h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="make">Make/Brand</label>
+                        <input type="text" id="make" name="make" class="form-control" placeholder="e.g., GE, Whirlpool">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="typ">Product Type</label>
+                        <input type="text" id="typ" name="typ" class="form-control" placeholder="e.g., Refrigerator">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="model">Model Number</label>
+                    <input type="text" id="model" name="model" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="serial">Serial Number</label>
+                    <input type="text" id="serial" name="serial" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="datepur">Purchase Date</label>
+                    <input type="date" id="datepur" name="datepur" class="form-control">
+                </div>
+            </div>
+
+            <!-- Service Information Section -->
+            <div class="form-section">
+                <h3>
+                    <svg class="form-section__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+                    </svg>
+                    Service Information
+                </h3>
+                <div class="form-group">
+                    <label class="form-label" for="servicereq">Service Request / Problem *</label>
+                    <textarea id="servicereq" name="servicereq" class="form-control" rows="4" placeholder="Describe the problem or service needed..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="location">Service Type</label>
+                    <select id="location" name="location" class="form-control">
+                        <option value="Service Call">Service Call (On-Site)</option>
+                        <option value="Shop">Shop Repair (Drop-Off)</option>
+                        <option value="Delivery">Delivery</option>
+                        <option value="Pickup">Pickup</option>
+                        <option value="Estimate">Estimate Only</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="accessor">Accessor Notes</label>
+                    <textarea id="accessor" name="accessor" class="form-control" rows="2" placeholder="Additional notes, special instructions..."></textarea>
+                </div>
+            </div>
+
+            <!-- Reference Information Section -->
+            <div class="form-section">
+                <h3>
+                    <svg class="form-section__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                    Reference Information
+                </h3>
+                <div class="form-group">
+                    <label class="form-label" for="invoice">Invoice Number</label>
+                    <input type="text" id="invoice" name="invoice" class="form-control" placeholder="Auto-generated if blank">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="dlrinvoice">ServicePower Call Number</label>
+                    <input type="text" id="dlrinvoice" name="dlrinvoice" class="form-control" placeholder="e.g., C12345678">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="btaddress">BT Address (External Ref)</label>
+                    <input type="text" id="btaddress" name="btaddress" class="form-control" placeholder="External reference number">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="datein">Date In</label>
+                        <input type="date" id="datein" name="datein" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="dateprom">Date Promised</label>
+                        <input type="date" id="dateprom" name="dateprom" class="form-control">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ticket-actions">
+            <button type="submit" class="btn btn-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                    <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                    <polyline points="7 3 7 8 15 8"></polyline>
+                </svg>
+                Save Ticket
+            </button>
+            <button type="button" class="btn btn-outline" onclick="previewTicket()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+                Preview
+            </button>
+            <button type="button" class="btn btn-secondary" onclick="exportTicket()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                Export to DBF
+            </button>
+            <button type="reset" class="btn btn-danger" onclick="clearForm()">
+                Clear Form
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Preview Card -->
+<div class="card" id="preview-card" style="display: none;">
+    <div class="card__header">
+        <h2 class="card__title">Ticket Preview</h2>
+        <button type="button" class="btn btn-outline" onclick="document.getElementById('preview-card').style.display='none'">
+            Close
+        </button>
+    </div>
+    <pre class="ticket-preview" id="ticket-preview"></pre>
+</div>
+
+<div id="alert-container"></div>
+{% endblock %}
+
+{% block extra_scripts %}
+// Track loaded ticket
+let loadedTicketId = null;
+
+// Set default dates
+document.getElementById('datein').value = new Date().toISOString().split('T')[0];
+const promisedDate = new Date();
+promisedDate.setDate(promisedDate.getDate() + 7);
+document.getElementById('dateprom').value = promisedDate.toISOString().split('T')[0];
+
+// Ticket Lookup Function
+async function lookupTicket(event) {
+    event.preventDefault();
+
+    const reference = document.getElementById('lookup-reference').value.trim();
+    if (!reference) {
+        showAlert('Please enter a search term', 'warning');
+        return;
+    }
+
+    const btn = document.getElementById('lookup-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner" style="width:16px;height:16px;border-width:2px;"></span> Searching...';
+
+    try {
+        const response = await fetch('/api/tickets/lookup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ reference: reference })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            displaySearchResults(data.tickets, data.count);
+            if (data.count > 0) {
+                showAlert(`Found ${data.count} ticket(s)`, 'success');
+            } else {
+                showAlert('No tickets found matching your search', 'info');
+            }
+        } else {
+            showAlert(data.error || 'Search failed', 'danger');
+        }
+    } catch (err) {
+        console.error('Lookup error:', err);
+        showAlert('Error searching tickets: ' + err.message, 'danger');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <path d="m21 21-4.3-4.3"></path>
+            </svg>
+            Search
+        `;
+    }
+}
+
+// Display search results
+function displaySearchResults(tickets, count) {
+    const resultsSection = document.getElementById('search-results');
+    const resultsContainer = document.getElementById('results-container');
+    const resultsCount = document.getElementById('results-count');
+
+    resultsCount.textContent = `${count} ticket(s) found`;
+
+    if (!tickets || tickets.length === 0) {
+        resultsContainer.innerHTML = `
+            <div class="search-results__empty">
+                <p>No tickets found. Try a different search term or create a new ticket below.</p>
+            </div>
+        `;
+        resultsSection.classList.add('active');
+        return;
+    }
+
+    let html = `
+        <div class="table-container">
+            <table class="search-results__table">
+                <thead>
+                    <tr>
+                        <th>Invoice</th>
+                        <th>Customer</th>
+                        <th>Address</th>
+                        <th>Phone</th>
+                        <th>Product</th>
+                        <th>Date In</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+
+    tickets.forEach((ticket, index) => {
+        const invoice = ticket.INVOICE || '';
+        const lastname = ticket.LASTNAME || '';
+        const firstname = ticket.FIRSTNAME || '';
+        const address = ticket.ADDRESS || '';
+        const city = ticket.CITY || '';
+        const phone = ticket.PHONE || '';
+        const make = ticket.MAKE || '';
+        const typ = ticket.TYP || '';
+        const datein = formatDate(ticket.DATEIN);
+
+        html += `
+            <tr data-index="${index}" onclick="selectTicket(${index})" class="search-result-row">
+                <td><strong>${invoice}</strong></td>
+                <td>${lastname}${firstname ? ', ' + firstname : ''}</td>
+                <td>${address}${city ? ', ' + city : ''}</td>
+                <td>${phone}</td>
+                <td>${make} ${typ}</td>
+                <td>${datein}</td>
+                <td>
+                    <button class="btn btn-primary" style="padding: 4px 12px; font-size: 0.85rem;" onclick="event.stopPropagation(); loadTicket(${index})">
+                        Load
+                    </button>
+                </td>
+            </tr>
+        `;
+    });
+
+    html += '</tbody></table></div>';
+    resultsContainer.innerHTML = html;
+    resultsSection.classList.add('active');
+
+    // Store tickets for later use
+    window.searchResults = tickets;
+}
+
+// Select ticket row (visual feedback)
+function selectTicket(index) {
+    document.querySelectorAll('.search-result-row').forEach(row => {
+        row.classList.remove('selected');
+    });
+    document.querySelector(`[data-index="${index}"]`).classList.add('selected');
+}
+
+// Load ticket data into form
+function loadTicket(index) {
+    const ticket = window.searchResults[index];
+    if (!ticket) return;
+
+    // Mark row as selected
+    selectTicket(index);
+
+    // Populate form fields
+    const fieldMappings = {
+        'invoice': 'INVOICE',
+        'lastname': 'LASTNAME',
+        'firstname': 'FIRSTNAME',
+        'address': 'ADDRESS',
+        'city': 'CITY',
+        'state': 'STATE',
+        'zip': 'ZIP',
+        'phone': 'PHONE',
+        'phone2': 'PHONE2',
+        'make': 'MAKE',
+        'typ': 'TYP',
+        'model': 'MODEL',
+        'serial': 'SERIAL',
+        'servicereq': 'SERVICEREQ',
+        'location': 'LOCATION',
+        'accessor': 'ACCESSOR',
+        'dlrinvoice': 'DLRINVOICE',
+        'btaddress': 'BTADDRESS'
+    };
+
+    for (const [formField, dbField] of Object.entries(fieldMappings)) {
+        const element = document.getElementById(formField);
+        if (element && ticket[dbField]) {
+            element.value = ticket[dbField];
+        }
+    }
+
+    // Handle date fields
+    if (ticket.DATEIN) {
+        const datein = parseDate(ticket.DATEIN);
+        if (datein) document.getElementById('datein').value = datein;
+    }
+    if (ticket.DATEPROM) {
+        const dateprom = parseDate(ticket.DATEPROM);
+        if (dateprom) document.getElementById('dateprom').value = dateprom;
+    }
+    if (ticket.DATEPUR) {
+        const datepur = parseDate(ticket.DATEPUR);
+        if (datepur) document.getElementById('datepur').value = datepur;
+    }
+
+    // Update UI to show loaded ticket
+    loadedTicketId = ticket.INVOICE || ticket.DLRINVOICE || 'Unknown';
+    document.getElementById('form-title').textContent = 'Edit Ticket';
+    document.getElementById('loaded-ticket-badge').style.display = 'inline-flex';
+    document.getElementById('loaded-ticket-id').textContent = loadedTicketId;
+    document.getElementById('clear-btn').style.display = 'inline-flex';
+
+    // Scroll to form
+    document.getElementById('ticket-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    showAlert(`Loaded ticket ${loadedTicketId}`, 'success');
+}
+
+// Parse date from various formats
+function parseDate(dateValue) {
+    if (!dateValue) return null;
+
+    // Handle Date objects
+    if (dateValue instanceof Date) {
+        return dateValue.toISOString().split('T')[0];
+    }
+
+    // Handle string formats
+    const str = String(dateValue).trim();
+    if (!str || str === 'None' || str === 'nan') return null;
+
+    // Try to parse
+    try {
+        const date = new Date(str);
+        if (!isNaN(date.getTime())) {
+            return date.toISOString().split('T')[0];
+        }
+    } catch {
+        // Ignore parse errors
+    }
+
+    return null;
+}
+
+// Format date for display
+function formatDate(dateValue) {
+    const parsed = parseDate(dateValue);
+    if (!parsed) return '';
+    try {
+        return new Date(parsed).toLocaleDateString();
+    } catch {
+        return '';
+    }
+}
+
+// Clear form and reset state
+function clearForm() {
+    document.getElementById('ticket-form').reset();
+    loadedTicketId = null;
+    document.getElementById('form-title').textContent = 'Create New Ticket';
+    document.getElementById('loaded-ticket-badge').style.display = 'none';
+    document.getElementById('clear-btn').style.display = 'none';
+    document.getElementById('preview-card').style.display = 'none';
+
+    // Reset default dates
+    document.getElementById('datein').value = new Date().toISOString().split('T')[0];
+    const promisedDate = new Date();
+    promisedDate.setDate(promisedDate.getDate() + 7);
+    document.getElementById('dateprom').value = promisedDate.toISOString().split('T')[0];
+}
+
+// Form submission
+document.getElementById('ticket-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const formData = new FormData(this);
+    const ticket = Object.fromEntries(formData.entries());
+
+    if (!ticket.lastname) {
+        showAlert('Last name is required', 'warning');
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/tickets', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(ticket)
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            showAlert('Ticket saved successfully!', 'success');
+            if (!loadedTicketId) {
+                // Only reset if creating new ticket
+                this.reset();
+            }
+        } else {
+            showAlert(data.error || 'Failed to save ticket', 'danger');
+        }
+    } catch (err) {
+        showAlert('Error: ' + err.message, 'danger');
+    }
+});
+
+function previewTicket() {
+    const form = document.getElementById('ticket-form');
+    const formData = new FormData(form);
+    const ticket = Object.fromEntries(formData.entries());
+
+    const preview = `
+================================================================================
+                         METRO TV & APPLIANCE - SERVICE TICKET
+================================================================================
+
+INVOICE:     ${ticket.invoice || '[Auto-generated]'}
+DATE IN:     ${ticket.datein || new Date().toLocaleDateString()}
+DATE PROM:   ${ticket.dateprom || 'Not set'}
+
+--------------------------------------------------------------------------------
+                              CUSTOMER INFORMATION
+--------------------------------------------------------------------------------
+NAME:        ${ticket.lastname}${ticket.firstname ? ', ' + ticket.firstname : ''}
+ADDRESS:     ${ticket.address || 'Not provided'}
+             ${ticket.city || ''}${ticket.state ? ', ' + ticket.state : ''} ${ticket.zip || ''}
+PHONE:       ${ticket.phone || 'Not provided'}
+PHONE 2:     ${ticket.phone2 || '-'}
+
+--------------------------------------------------------------------------------
+                              PRODUCT INFORMATION
+--------------------------------------------------------------------------------
+MAKE:        ${ticket.make || 'Not specified'}
+TYPE:        ${ticket.typ || 'Not specified'}
+MODEL:       ${ticket.model || '-'}
+SERIAL:      ${ticket.serial || '-'}
+PURCHASED:   ${ticket.datepur || 'Unknown'}
+
+--------------------------------------------------------------------------------
+                              SERVICE INFORMATION
+--------------------------------------------------------------------------------
+SERVICE TYPE:  ${ticket.location || 'Service Call'}
+
+PROBLEM DESCRIPTION:
+${ticket.servicereq || 'No description provided'}
+
+ACCESSOR NOTES:
+${ticket.accessor || 'None'}
+
+--------------------------------------------------------------------------------
+                              REFERENCE NUMBERS
+--------------------------------------------------------------------------------
+SP CALL #:   ${ticket.dlrinvoice || '-'}
+BT ADDRESS:  ${ticket.btaddress || '-'}
+
+================================================================================
+    `.trim();
+
+    document.getElementById('ticket-preview').textContent = preview;
+    document.getElementById('preview-card').style.display = 'block';
+    document.getElementById('preview-card').scrollIntoView({ behavior: 'smooth' });
+}
+
+async function exportTicket() {
+    const form = document.getElementById('ticket-form');
+    const formData = new FormData(form);
+    const ticket = Object.fromEntries(formData.entries());
+
+    if (!ticket.lastname) {
+        showAlert('Please enter at least a last name', 'warning');
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/export/dbf', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                calls: [{
+                    ...ticket,
+                    invoice: ticket.invoice || Date.now().toString().slice(-5)
+                }]
+            })
+        });
+
+        if (response.ok) {
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `ticket_${ticket.invoice || Date.now()}.dbf`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            a.remove();
+            showAlert('DBF file downloaded', 'success');
+        } else {
+            const data = await response.json();
+            showAlert(data.error || 'Export failed', 'danger');
+        }
+    } catch (err) {
+        showAlert('Error: ' + err.message, 'danger');
+    }
+}
+
+function showAlert(message, type) {
+    const container = document.getElementById('alert-container');
+    const alertId = 'alert-' + Date.now();
+    const alertHtml = `
+        <div id="${alertId}" class="alert alert-${type}" style="position: fixed; top: 80px; right: 20px; z-index: 1100; max-width: 400px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+            ${message}
+        </div>
+    `;
+    container.insertAdjacentHTML('beforeend', alertHtml);
+
+    if (type !== 'danger') {
+        setTimeout(() => {
+            const alert = document.getElementById(alertId);
+            if (alert) alert.remove();
+        }, 4000);
+    }
+}
+
+// Keyboard shortcut for search (Ctrl/Cmd + K)
+document.addEventListener('keydown', function(e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        document.getElementById('lookup-reference').focus();
+    }
+});
+{% endblock %}

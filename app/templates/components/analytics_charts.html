@@ -1,0 +1,82 @@
+{# Analytics charts component #}
+<div class="analytics-charts">
+    <div class="chart-row">
+        <div class="chart-card">
+            <h4>Top Makes</h4>
+            <canvas id="makes-chart"></canvas>
+        </div>
+        <div class="chart-card">
+            <h4>Top Cities</h4>
+            <canvas id="cities-chart"></canvas>
+        </div>
+    </div>
+
+    <div class="chart-row">
+        <div class="chart-card">
+            <h4>Product Types</h4>
+            <canvas id="types-chart"></canvas>
+        </div>
+        <div class="chart-card">
+            <h4>Most Common Parts</h4>
+            <div id="parts-list" class="parts-list">
+                <!-- Populated via JavaScript -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .analytics-charts {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .chart-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+    }
+
+    .chart-card {
+        background: var(--color-bg-card);
+        border-radius: var(--radius-lg);
+        padding: 20px;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .chart-card h4 {
+        margin-bottom: 15px;
+        color: var(--color-text);
+        font-size: 1.1rem;
+    }
+
+    .chart-card canvas {
+        max-height: 250px;
+    }
+
+    .parts-list {
+        max-height: 250px;
+        overflow-y: auto;
+    }
+
+    .parts-list-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px solid var(--color-border);
+    }
+
+    .parts-list-item:last-child {
+        border-bottom: none;
+    }
+
+    .part-number {
+        font-weight: 500;
+    }
+
+    .part-count {
+        color: var(--color-text-muted);
+        font-size: 0.9rem;
+    }
+</style>

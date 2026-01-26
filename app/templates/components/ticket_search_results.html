@@ -1,0 +1,196 @@
+{# Ticket search results component for HTMX partial updates #}
+{# Used by /api/tickets/lookup endpoint to render search results #}
+
+{% if tickets and tickets|length > 0 %}
+<div class="ticket-search-results">
+    <div class="results-header">
+        <span class="results-count">{{ tickets|length }} ticket(s) found</span>
+        <button class="btn btn--sm btn--ghost" onclick="document.getElementById('search-results').classList.remove('active')">
+            Clear Results
+        </button>
+    </div>
+
+    <div class="table-container">
+        <table class="table table--compact table--striped">
+            <thead>
+                <tr>
+                    <th>Invoice</th>
+                    <th>Customer</th>
+                    <th>Address</th>
+                    <th>Phone</th>
+                    <th>Product</th>
+                    <th>Date In</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ticket in tickets %}
+                <tr class="ticket-row" data-index="{{ loop.index0 }}" data-ticket="{{ ticket | tojson | e }}">
+                    <td>
+                        <strong class="ticket-invoice">{{ ticket.INVOICE or ticket.invoice or '-' }}</strong>
+                    </td>
+                    <td>
+                        {{ ticket.LASTNAME or ticket.lastname or '' }}{% if ticket.FIRSTNAME or ticket.firstname %}, {{ ticket.FIRSTNAME or ticket.firstname }}{% endif %}
+                    </td>
+                    <td>
+                        {{ ticket.ADDRESS or ticket.address or '' }}
+                        {% if ticket.CITY or ticket.city %}
+                        <br><small class="text-muted">{{ ticket.CITY or ticket.city }}{% if ticket.STATE or ticket.state %}, {{ ticket.STATE or ticket.state }}{% endif %}</small>
+                        {% endif %}
+                    </td>
+                    <td>{{ ticket.PHONE or ticket.phone or '-' }}</td>
+                    <td>
+                        {{ ticket.MAKE or ticket.make or '' }} {{ ticket.TYP or ticket.typ or '' }}
+                    </td>
+                    <td>
+                        {% if ticket.DATEIN %}
+                            {{ ticket.DATEIN | default('-') }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% set status = ticket.STATUS or ticket.status or 'Open' %}
+                        {% if ticket.DATECOMPLT or ticket.datecomplt %}
+                            <span class="badge badge--success">Completed</span>
+                        {% elif ticket.DATEPICKUP or ticket.datepickup %}
+                            <span class="badge badge--info">Ready</span>
+                        {% else %}
+                            <span class="badge badge--warning">{{ status }}</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <button
+                            class="btn btn--sm btn--primary"
+                            onclick="loadTicketFromRow(this)"
+                            data-ticket="{{ ticket | tojson | e }}"
+                        >
+                            Load
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if total_records %}
+    <div class="results-footer">
+        <small class="text-muted">Showing {{ tickets|length }} of {{ total_records }} total records</small>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    .ticket-search-results {
+        width: 100%;
+    }
+
+    .results-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: var(--space-3);
+    }
+
+    .results-count {
+        font-size: var(--text-sm);
+        color: var(--fg-muted);
+    }
+
+    .table-container {
+        max-height: 400px;
+        overflow-y: auto;
+        border: 1px solid var(--border-default);
+        border-radius: var(--radius-md);
+    }
+
+    .ticket-row {
+        cursor: pointer;
+        transition: background-color 0.15s ease;
+    }
+
+    .ticket-row:hover {
+        background-color: var(--bg-muted);
+    }
+
+    .ticket-row.selected {
+        background-color: var(--accent-subtle);
+        border-left: 3px solid var(--accent-fg);
+    }
+
+    .ticket-invoice {
+        color: var(--accent-fg);
+    }
+
+    .results-footer {
+        padding: var(--space-3);
+        text-align: center;
+        border-top: 1px solid var(--border-muted);
+    }
+</style>
+
+<script>
+function loadTicketFromRow(button) {
+    try {
+        const ticketData = JSON.parse(button.dataset.ticket);
+        if (typeof loadTicketData === 'function') {
+            loadTicketData(ticketData);
+        } else {
+            console.error('loadTicketData function not found');
+        }
+    } catch (e) {
+        console.error('Error parsing ticket data:', e);
+    }
+}
+</script>
+
+{% else %}
+<div class="empty-results">
+    <div class="empty-results__icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <path d="m21 21-4.3-4.3"></path>
+        </svg>
+    </div>
+    <h4 class="empty-results__title">No Tickets Found</h4>
+    <p class="empty-results__message">
+        {% if search_term %}
+        No tickets match "{{ search_term }}". Try a different search term.
+        {% else %}
+        Enter a search term to find existing tickets.
+        {% endif %}
+    </p>
+</div>
+
+<style>
+    .empty-results {
+        text-align: center;
+        padding: var(--space-12) var(--space-6);
+        color: var(--fg-muted);
+    }
+
+    .empty-results__icon {
+        margin-bottom: var(--space-4);
+        opacity: 0.5;
+    }
+
+    .empty-results__icon svg {
+        margin: 0 auto;
+    }
+
+    .empty-results__title {
+        font-size: var(--text-lg);
+        font-weight: var(--weight-semibold);
+        color: var(--fg-default);
+        margin-bottom: var(--space-2);
+    }
+
+    .empty-results__message {
+        font-size: var(--text-sm);
+        max-width: 300px;
+        margin: 0 auto;
+    }
+</style>
+{% endif %}

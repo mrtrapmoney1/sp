@@ -1,0 +1,61 @@
+{# Parts search results component #}
+<div class="parts-results" id="parts-results">
+    {% if parts and parts|length > 0 %}
+    <div class="results-header">
+        <span>Found {{ count }} parts {% if search %}matching "{{ search }}"{% endif %}</span>
+    </div>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Part Number</th>
+                <th>Description</th>
+                <th>Vendor</th>
+                <th>Cost</th>
+                <th>Location</th>
+                <th>Invoice</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for part in parts %}
+            <tr>
+                <td><strong>{{ part.part_num }}</strong></td>
+                <td>{{ part.part_descr or '-' }}</td>
+                <td>{{ part.vendor or 'Marcone' }}</td>
+                <td>{% if part.cost %}${{ "%.2f"|format(part.cost) }}{% else %}-{% endif %}</td>
+                <td>{{ part.location or '-' }}</td>
+                <td>{{ part.invoice or '-' }}</td>
+                <td>{{ part.created_at[:10] if part.created_at else '-' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% elif search %}
+    <div class="empty-state">
+        <p>No parts found matching "{{ search }}"</p>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <p>Enter a search term to find parts</p>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    .parts-results {
+        margin-top: 20px;
+    }
+
+    .results-header {
+        padding: 10px 0;
+        color: var(--color-text-muted);
+        font-size: 0.9rem;
+    }
+
+    .empty-state {
+        padding: 40px;
+        text-align: center;
+        color: var(--color-text-muted);
+    }
+</style>

@@ -10,7 +10,10 @@
       "Bash(python3:*)",
       "Bash(pip3 install:*)",
       "Bash(file:*)",
-      "Bash(xxd:*)"
+      "Bash(xxd:*)",
+      "Bash(tree:*)",
+      "WebFetch(domain:fss.servicepower.com)",
+      "Bash(python:*)"
     ]
   }
 }

@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ServiceDispatch{% endblock %} - Metro TV & Appliance</title>
+
+    <!-- HTMX for dynamic updates -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+
+    <style>
+        /* ==========================================================================
+           CSS Custom Properties (Design Tokens)
+           Following CODING_STANDARDS.md - CSS variables for theming
+           ========================================================================== */
+        :root {
+            /* Primary Colors */
+            --color-primary: #1a365d;
+            --color-primary-light: #2c5282;
+            --color-primary-dark: #0f2540;
+
+            /* Secondary Colors */
+            --color-secondary: #4a5568;
+            --color-secondary-light: #718096;
+            --color-secondary-dark: #2d3748;
+
+            /* Semantic Colors */
+            --color-success: #48bb78;
+            --color-success-light: #68d391;
+            --color-warning: #ed8936;
+            --color-warning-light: #f6ad55;
+            --color-danger: #fc8181;
+            --color-danger-light: #feb2b2;
+            --color-info: #63b3ed;
+            --color-info-light: #90cdf4;
+
+            /* Background Colors */
+            --color-bg: #f5f7fa;
+            --color-bg-card: #ffffff;
+            --color-bg-elevated: #ffffff;
+            --color-bg-muted: #edf2f7;
+
+            /* Text Colors */
+            --color-text: #333333;
+            --color-text-muted: #718096;
+            --color-text-inverted: #ffffff;
+
+            /* Border Colors */
+            --color-border: #e2e8f0;
+            --color-border-dark: #cbd5e0;
+
+            /* Shadows */
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 25px rgba(0,0,0,0.15);
+            --shadow-xl: 0 20px 40px rgba(0,0,0,0.2);
+
+            /* Border Radius */
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --radius-full: 9999px;
+
+            /* Spacing (consistent with 4px base) */
+            --space-1: 4px;
+            --space-2: 8px;
+            --space-3: 12px;
+            --space-4: 16px;
+            --space-5: 20px;
+            --space-6: 24px;
+            --space-8: 32px;
+            --space-10: 40px;
+            --space-12: 48px;
+
+            /* Typography */
+            --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            --font-mono: 'Cascadia Code', Consolas, Monaco, 'Andale Mono', monospace;
+
+            /* Z-index layers */
+            --z-dropdown: 100;
+            --z-sticky: 200;
+            --z-fixed: 300;
+            --z-modal-backdrop: 400;
+            --z-modal: 500;
+            --z-tooltip: 600;
+            --z-toast: 700;
+
+            /* Transitions */
+            --transition-fast: 0.15s ease;
+            --transition-base: 0.2s ease;
+            --transition-slow: 0.3s ease;
+        }
+
+        /* Light mode overrides */
+        body.light-mode {
+            --color-bg: #ffffff;
+            --color-bg-card: #f7fafc;
+            --color-text: #1a202c;
+            --color-border: #e2e8f0;
+        }
+
+        /* ==========================================================================
+           Base Styles
+           ========================================================================== */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.6;
+            transition: background var(--transition-slow), color var(--transition-slow);
+        }
+
+        /* ==========================================================================
+           Header Component (BEM: .header)
+           ========================================================================== */
+        .header {
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+            color: var(--color-text-inverted);
+            padding: var(--space-4) var(--space-5);
+            box-shadow: var(--shadow-md);
+            position: sticky;
+            top: 0;
+            z-index: var(--z-sticky);
+        }
+
+        .header__content {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: var(--space-3);
+        }
+
+        .header__title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        /* ==========================================================================
+           Navigation Component (BEM: .nav)
+           ========================================================================== */
+        .nav {
+            display: flex;
+            gap: var(--space-1);
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .nav__link {
+            color: var(--color-text-inverted);
+            text-decoration: none;
+            padding: var(--space-2) var(--space-4);
+            border-radius: var(--radius-md);
+            transition: background var(--transition-base);
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .nav__link:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .nav__link--active {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .nav__link--logout {
+            color: var(--color-danger-light);
+        }
+
+        /* Legacy nav link support */
+        .nav a {
+            color: var(--color-text-inverted);
+            text-decoration: none;
+            padding: var(--space-2) var(--space-4);
+            border-radius: var(--radius-md);
+            transition: background var(--transition-base);
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .nav a:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .nav a.active {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .nav a.logout {
+            color: var(--color-danger-light);
+        }
+
+        /* ==========================================================================
+           Button Component (BEM: .btn)
+           ========================================================================== */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-2);
+            padding: var(--space-2) var(--space-4);
+            border-radius: var(--radius-md);
+            font-weight: 500;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            border: none;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-primary,
+        .btn--primary {
+            background: var(--color-primary);
+            color: var(--color-text-inverted);
+        }
+
+        .btn-primary:hover,
+        .btn--primary:hover {
+            background: var(--color-primary-light);
+        }
+
+        .btn-secondary,
+        .btn--secondary {
+            background: var(--color-secondary);
+            color: var(--color-text-inverted);
+        }
+
+        .btn-secondary:hover,
+        .btn--secondary:hover {
+            background: var(--color-secondary-light);
+        }
+
+        .btn-success,
+        .btn--success {
+            background: var(--color-success);
+            color: var(--color-text-inverted);
+        }
+
+        .btn-success:hover,
+        .btn--success:hover {
+            background: var(--color-success-light);
+        }
+
+        .btn-danger,
+        .btn--danger {
+            background: var(--color-danger);
+            color: var(--color-text-inverted);
+        }
+
+        .btn-danger:hover,
+        .btn--danger:hover {
+            background: var(--color-danger-light);
+        }
+
+        .btn-outline,
+        .btn--outline {
+            background: transparent;
+            border: 1px solid var(--color-border);
+            color: var(--color-text);
+        }
+
+        .btn-outline:hover,
+        .btn--outline:hover {
+            background: var(--color-bg-muted);
+            border-color: var(--color-border-dark);
+        }
+
+        .btn--sm {
+            padding: var(--space-1) var(--space-3);
+            font-size: 0.8rem;
+        }
+
+        .btn--lg {
+            padding: var(--space-3) var(--space-6);
+            font-size: 1rem;
+        }
+
+        .btn--ghost {
+            background: transparent;
+            color: var(--color-text-muted);
+        }
+
+        .btn--ghost:hover {
+            background: var(--color-bg-muted);
+            color: var(--color-text);
+        }
+
+        /* Theme toggle button */
+        .theme-toggle {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: var(--color-text-inverted);
+            padding: var(--space-2) var(--space-4);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all var(--transition-base);
+        }
+
+        .theme-toggle:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        /* ==========================================================================
+           Container
+           ========================================================================== */
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: var(--space-5);
+        }
+
+        /* ==========================================================================
+           Card Component (BEM: .card)
+           ========================================================================== */
+        .card {
+            background: var(--color-bg-card);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            padding: var(--space-5);
+            margin-bottom: var(--space-5);
+        }
+
+        .card__header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-4);
+            padding-bottom: var(--space-4);
+            border-bottom: 1px solid var(--color-border);
+            flex-wrap: wrap;
+            gap: var(--space-3);
+        }
+
+        .card__title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--color-text);
+        }
+
+        .card__body {
+            padding: var(--space-4) 0;
+        }
+
+        .card__footer {
+            padding-top: var(--space-4);
+            border-top: 1px solid var(--color-border);
+        }
+
+        /* ==========================================================================
+           Form Components
+           ========================================================================== */
+        .form-group {
+            margin-bottom: var(--space-4);
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: var(--space-1);
+            font-weight: 500;
+            color: var(--color-text);
+            font-size: 0.9rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: var(--space-3);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            font-family: var(--font-sans);
+            transition: border-color var(--transition-base), box-shadow var(--transition-base);
+            background: var(--color-bg-card);
+            color: var(--color-text);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(26, 54, 93, 0.15);
+        }
+
+        .form-control::placeholder {
+            color: var(--color-text-muted);
+        }
+
+        select.form-control {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23718096' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 16px;
+            padding-right: 40px;
+            cursor: pointer;
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        /* ==========================================================================
+           Alert Component (BEM: .alert)
+           ========================================================================== */
+        .alert {
+            padding: var(--space-3) var(--space-4);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--space-4);
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-3);
+        }
+
+        .alert-success,
+        .alert--success {
+            background: rgba(72, 187, 120, 0.1);
+            border: 1px solid var(--color-success);
+            color: #276749;
+        }
+
+        .alert-danger,
+        .alert--danger {
+            background: rgba(252, 129, 129, 0.1);
+            border: 1px solid var(--color-danger);
+            color: #c53030;
+        }
+
+        .alert-info,
+        .alert--info {
+            background: rgba(99, 179, 237, 0.1);
+            border: 1px solid var(--color-info);
+            color: #2b6cb0;
+        }
+
+        .alert-warning,
+        .alert--warning {
+            background: rgba(237, 137, 54, 0.1);
+            border: 1px solid var(--color-warning);
+            color: #c05621;
+        }
+
+        /* ==========================================================================
+           Table Component
+           ========================================================================== */
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th,
+        .table td {
+            padding: var(--space-3);
+            text-align: left;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .table th {
+            font-weight: 600;
+            background: var(--color-bg-muted);
+            position: sticky;
+            top: 0;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--color-text-muted);
+        }
+
+        .table tbody tr:hover {
+            background: rgba(0, 0, 0, 0.02);
+        }
+
+        .table--striped tbody tr:nth-child(even) {
+            background: var(--color-bg-muted);
+        }
+
+        .table--compact th,
+        .table--compact td {
+            padding: var(--space-2);
+            font-size: 0.875rem;
+        }
+
+        /* ==========================================================================
+           Badge Component
+           ========================================================================== */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 8px;
+            border-radius: var(--radius-sm);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .badge--success {
+            background: rgba(72, 187, 120, 0.15);
+            color: #276749;
+        }
+
+        .badge--warning {
+            background: rgba(237, 137, 54, 0.15);
+            color: #c05621;
+        }
+
+        .badge--danger {
+            background: rgba(252, 129, 129, 0.15);
+            color: #c53030;
+        }
+
+        .badge--info {
+            background: rgba(99, 179, 237, 0.15);
+            color: #2b6cb0;
+        }
+
+        .badge--primary {
+            background: rgba(26, 54, 93, 0.15);
+            color: var(--color-primary);
+        }
+
+        /* ==========================================================================
+           Modal Component (BEM: .modal)
+           ========================================================================== */
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: var(--z-modal-backdrop);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity var(--transition-base), visibility var(--transition-base);
+        }
+
+        .modal-backdrop--open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.95);
+            background: var(--color-bg-card);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-xl);
+            z-index: var(--z-modal);
+            width: calc(100% - 40px);
+            max-width: 600px;
+            max-height: calc(100vh - 40px);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity var(--transition-base), visibility var(--transition-base), transform var(--transition-base);
+        }
+
+        .modal--open {
+            opacity: 1;
+            visibility: visible;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .modal--lg {
+            max-width: 800px;
+        }
+
+        .modal--xl {
+            max-width: 1000px;
+        }
+
+        .modal__header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--space-4) var(--space-5);
+            border-bottom: 1px solid var(--color-border);
+            flex-shrink: 0;
+        }
+
+        .modal__title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--color-text);
+        }
+
+        .modal__close {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: var(--space-2);
+            border-radius: var(--radius-md);
+            color: var(--color-text-muted);
+            transition: all var(--transition-base);
+        }
+
+        .modal__close:hover {
+            background: var(--color-bg-muted);
+            color: var(--color-text);
+        }
+
+        .modal__body {
+            padding: var(--space-5);
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .modal__footer {
+            padding: var(--space-4) var(--space-5);
+            border-top: 1px solid var(--color-border);
+            display: flex;
+            justify-content: flex-end;
+            gap: var(--space-3);
+            flex-shrink: 0;
+        }
+
+        /* ==========================================================================
+           Loading Indicators
+           ========================================================================== */
+        .htmx-indicator {
+            display: none;
+        }
+
+        .htmx-request .htmx-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+
+        .htmx-request.htmx-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--color-border);
+            border-top-color: var(--color-primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        .spinner--sm {
+            width: 14px;
+            height: 14px;
+            border-width: 2px;
+        }
+
+        .spinner--lg {
+            width: 32px;
+            height: 32px;
+            border-width: 3px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ==========================================================================
+           Grid System
+           ========================================================================== */
+        .grid {
+            display: grid;
+            gap: var(--space-5);
+        }
+
+        .grid-2 {
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+
+        .grid-3 {
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        }
+
+        .grid-4 {
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        }
+
+        /* ==========================================================================
+           Utility Classes
+           ========================================================================== */
+        /* Text alignment */
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .text-left { text-align: left; }
+
+        /* Text colors */
+        .text-muted { color: var(--color-text-muted); }
+        .text-success { color: var(--color-success); }
+        .text-danger { color: var(--color-danger); }
+        .text-warning { color: var(--color-warning); }
+        .text-info { color: var(--color-info); }
+        .text-primary { color: var(--color-primary); }
+
+        /* Spacing utilities */
+        .mt-1 { margin-top: var(--space-2); }
+        .mt-2 { margin-top: var(--space-4); }
+        .mt-3 { margin-top: var(--space-6); }
+        .mb-1 { margin-bottom: var(--space-2); }
+        .mb-2 { margin-bottom: var(--space-4); }
+        .mb-3 { margin-bottom: var(--space-6); }
+        .ml-1 { margin-left: var(--space-2); }
+        .ml-2 { margin-left: var(--space-4); }
+        .mr-1 { margin-right: var(--space-2); }
+        .mr-2 { margin-right: var(--space-4); }
+
+        .p-1 { padding: var(--space-2); }
+        .p-2 { padding: var(--space-4); }
+        .p-3 { padding: var(--space-6); }
+
+        /* Flexbox utilities */
+        .flex { display: flex; }
+        .flex-wrap { flex-wrap: wrap; }
+        .flex-col { flex-direction: column; }
+        .items-center { align-items: center; }
+        .items-start { align-items: flex-start; }
+        .items-end { align-items: flex-end; }
+        .justify-center { justify-content: center; }
+        .justify-between { justify-content: space-between; }
+        .justify-end { justify-content: flex-end; }
+        .gap-1 { gap: var(--space-2); }
+        .gap-2 { gap: var(--space-4); }
+        .gap-3 { gap: var(--space-6); }
+
+        /* Display utilities */
+        .hidden { display: none; }
+        .block { display: block; }
+        .inline-block { display: inline-block; }
+
+        /* Width utilities */
+        .w-full { width: 100%; }
+        .w-auto { width: auto; }
+
+        /* ==========================================================================
+           Responsive Styles
+           ========================================================================== */
+        @media (max-width: 768px) {
+            .header__content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .nav {
+                justify-content: center;
+            }
+
+            .container {
+                padding: var(--space-4);
+            }
+
+            .modal {
+                width: calc(100% - 20px);
+                max-height: calc(100vh - 20px);
+            }
+
+            .hide-mobile {
+                display: none;
+            }
+        }
+
+        @media (min-width: 769px) {
+            .hide-desktop {
+                display: none;
+            }
+        }
+
+        /* ==========================================================================
+           Page-specific styles (injected via block)
+           ========================================================================== */
+        {% block extra_styles %}{% endblock %}
+    </style>
+    {% block head_extra %}{% endblock %}
+</head>
+<body>
+    {% block header %}
+    <header class="header">
+        <div class="header__content">
+            <h1 class="header__title">{% block header_title %}ServiceDispatch{% endblock %}</h1>
+            <nav class="nav">
+                <a href="/dashboard" {% if active_page == 'dashboard' %}class="active"{% endif %}>Dashboard</a>
+                <a href="/tickets" {% if active_page == 'tickets' %}class="active"{% endif %}>Tickets</a>
+                <a href="/map" {% if active_page == 'map' %}class="active"{% endif %}>Map</a>
+                <a href="/analytics" {% if active_page == 'analytics' %}class="active"{% endif %}>Analytics</a>
+                <a href="/diagnosis" {% if active_page == 'diagnosis' %}class="active"{% endif %}>Diagnosis</a>
+                <a href="/parts" {% if active_page == 'parts' %}class="active"{% endif %}>Parts</a>
+                <a href="/import" {% if active_page == 'import' %}class="active"{% endif %}>Import</a>
+                <button class="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark theme">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+                <a href="#" class="logout" onclick="logout(); return false;">Logout</a>
+            </nav>
+        </div>
+    </header>
+    {% endblock %}
+
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+
+    <script>
+        // ==========================================================================
+        // Theme Management
+        // ==========================================================================
+        function toggleTheme() {
+            const body = document.body;
+            if (body.classList.contains('light-mode')) {
+                body.classList.remove('light-mode');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                body.classList.add('light-mode');
+                localStorage.setItem('theme', 'light');
+            }
+        }
+
+        // Load saved theme on page load
+        (function() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'light') {
+                document.body.classList.add('light-mode');
+            }
+        })();
+
+        // ==========================================================================
+        // Logout Function
+        // ==========================================================================
+        async function logout() {
+            if (!confirm('Are you sure you want to logout?')) return;
+            try {
+                await fetch('/api/logout', { method: 'POST' });
+                window.location.href = '/';
+            } catch (err) {
+                console.error('Logout error:', err);
+                window.location.href = '/';
+            }
+        }
+
+        // ==========================================================================
+        // HTMX Event Handlers
+        // ==========================================================================
+        document.body.addEventListener('htmx:beforeRequest', function(evt) {
+            // Add loading state if needed
+        });
+
+        document.body.addEventListener('htmx:afterRequest', function(evt) {
+            // Remove loading state if needed
+        });
+
+        document.body.addEventListener('htmx:responseError', function(evt) {
+            console.error('HTMX error:', evt.detail);
+            // Show user-friendly error message
+            const container = document.getElementById('alert-container');
+            if (container) {
+                container.innerHTML = '<div class="alert alert-danger">An error occurred. Please try again.</div>';
+            }
+        });
+
+        // ==========================================================================
+        // Global Keyboard Shortcuts
+        // ==========================================================================
+        document.addEventListener('keydown', function(e) {
+            // Escape key closes modals
+            if (e.key === 'Escape') {
+                const openModal = document.querySelector('.modal--open');
+                if (openModal) {
+                    const backdrop = document.querySelector('.modal-backdrop--open');
+                    if (backdrop) backdrop.classList.remove('modal-backdrop--open');
+                    openModal.classList.remove('modal--open');
+                    document.body.style.overflow = '';
+                }
+            }
+        });
+
+        // ==========================================================================
+        // Page-specific Scripts (injected via block)
+        // ==========================================================================
+        {% block extra_scripts %}{% endblock %}
+    </script>
+</body>
+</html>
