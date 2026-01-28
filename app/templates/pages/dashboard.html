@@ -1,0 +1,390 @@
+{% extends "layouts/base_bootstrap.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-xl">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-speedometer2"></i> Service Calls Dashboard</h2>
+        <div class="d-flex gap-2">
+            <button class="btn btn-warning" onclick="showBulkOperationsModal()">
+                <i class="bi bi-lightning-charge"></i> Bulk Operations
+            </button>
+            <button class="btn btn-primary" onclick="fetchCalls()" id="fetch-btn">
+                <i class="bi bi-cloud-download"></i> Fetch Calls
+            </button>
+            <button class="btn btn-outline-secondary" onclick="refreshCalls()">
+                <i class="bi bi-arrow-clockwise"></i> Refresh
+            </button>
+        </div>
+    </div>
+
+    <!-- Stats Cards Row -->
+    <div class="row g-3 mb-4" id="stats-container">
+        <div class="col-md-2">
+            <div class="card stat-card border-primary" onclick="clearFilter()" style="cursor: pointer;" title="Click to show all calls">
+                <div class="card-body">
+                    <div class="stat-value text-primary" id="stat-total">0</div>
+                    <div class="text-muted small">Total Calls</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card stat-card border-warning" onclick="filterByStatus('pending')" style="cursor: pointer;" title="Click to filter pending calls">
+                <div class="card-body">
+                    <div class="stat-value text-warning" id="stat-pending">0</div>
+                    <div class="text-muted small">Pending</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card stat-card border-success" onclick="filterByStatus('completed')" style="cursor: pointer;" title="Click to filter completed calls">
+                <div class="card-body">
+                    <div class="stat-value text-success" id="stat-completed">0</div>
+                    <div class="text-muted small">Completed</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card stat-card border-info" onclick="filterByStatus('accepted')" style="cursor: pointer;" title="Click to filter accepted calls">
+                <div class="card-body">
+                    <div class="stat-value text-info" id="stat-accepted">0</div>
+                    <div class="text-muted small">Accepted</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card stat-card border-danger" onclick="filterByStatus('cancelled')" style="cursor: pointer;" title="Click to filter cancelled calls">
+                <div class="card-body">
+                    <div class="stat-value text-danger" id="stat-cancelled">0</div>
+                    <div class="text-muted small">Cancelled</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card stat-card border-secondary" onclick="filterByStatus('parts')" style="cursor: pointer;" title="Click to filter calls needing parts">
+                <div class="card-body">
+                    <div class="stat-value text-secondary" id="stat-parts">0</div>
+                    <div class="text-muted small">Parts Needed</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Filter Indicator -->
+    <div id="filter-tags" class="mb-3"></div>
+
+    <!-- Date Range Selector -->
+    <div class="card mb-4">
+        <div class="card-header bg-light">
+            <h5 class="mb-0"><i class="bi bi-calendar-range"></i> Date Range</h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-3 align-items-end">
+                <!-- Quick Date Buttons -->
+                <div class="col-12">
+                    <label class="form-label fw-bold">Quick Select:</label>
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="setDateRange(0)">Today</button>
+                        <button type="button" class="btn btn-outline-primary btn-sm active" onclick="setDateRange(2)">2 Days</button>
+                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="setDateRange(7)">7 Days</button>
+                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="setDateRange(14)">14 Days</button>
+                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="setDateRange(30)">30 Days</button>
+                    </div>
+                </div>
+
+                <!-- Custom Date Range -->
+                <div class="col-md-4">
+                    <label for="from-date" class="form-label">From Date:</label>
+                    <input type="date" class="form-control" id="from-date">
+                </div>
+                <div class="col-md-4">
+                    <label for="to-date" class="form-label">To Date:</label>
+                    <input type="date" class="form-control" id="to-date">
+                </div>
+                <div class="col-md-4">
+                    <label for="status-filter" class="form-label">Status Filter:</label>
+                    <select class="form-select" id="status-filter">
+                        <option value="">All Statuses</option>
+                        <option value="NEW">New</option>
+                        <option value="ACCEPTED">Accepted</option>
+                        <option value="SCHEDULED">Scheduled</option>
+                        <option value="COMPLETED">Completed</option>
+                        <option value="CANCELLED">Cancelled</option>
+                        <option value="REJECTED">Rejected</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bulk Actions Bar (hidden by default) -->
+    <div id="bulk-actions" class="alert alert-primary d-none mb-4">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+                <strong><span id="selected-count">0</span> calls selected</strong>
+            </div>
+            <div class="d-flex gap-2">
+                <button class="btn btn-warning btn-sm" onclick="showBulkOperationsModal()">
+                    <i class="bi bi-lightning-charge"></i> Bulk Operations
+                </button>
+                <button class="btn btn-success btn-sm" onclick="bulkUpdateStatus('ACCEPTED', 'WAITING ON CUSTOMER')">
+                    <i class="bi bi-check-circle"></i> Accept Selected
+                </button>
+                <button class="btn btn-info btn-sm" onclick="exportSelected()">
+                    <i class="bi bi-file-earmark-arrow-down"></i> Export to DBF
+                </button>
+                <button class="btn btn-outline-secondary btn-sm" onclick="clearSelection()">
+                    <i class="bi bi-x"></i> Clear
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Calls Table -->
+    <div class="card">
+        <div class="card-header bg-light">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-list-ul"></i> Service Calls</h5>
+                <span class="badge bg-secondary" id="calls-count">0 calls</span>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover table-sm mb-0" id="calls-table">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 40px;">
+                                <input class="form-check-input" type="checkbox" id="select-all" onchange="toggleSelectAll()">
+                            </th>
+                            <th>Call #</th>
+                            <th>Customer</th>
+                            <th>Phone</th>
+                            <th>Product</th>
+                            <th>Problem</th>
+                            <th>Status</th>
+                            <th>Warranty</th>
+                            <th>Scheduled</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="calls-tbody">
+                        <tr>
+                            <td colspan="10" class="text-center py-5">
+                                <i class="bi bi-inbox text-muted" style="font-size: 3rem;"></i>
+                                <p class="text-muted mt-2">No calls loaded. Select a date range and click "Fetch Calls".</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer bg-light">
+            <div class="d-flex justify-content-between align-items-center small text-muted">
+                <span id="table-info">Showing 0 of 0 calls</span>
+                <span id="last-updated">Last updated: Never</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row (Optional - shown if calls loaded) -->
+    <div class="row g-4 mt-2 d-none" id="charts-row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="bi bi-pie-chart"></i> Warranty Breakdown</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="warranty-chart" style="max-height: 300px;"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="bi bi-graph-up"></i> Call Volume Trend</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="volume-chart" style="max-height: 300px;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Call Detail Modal -->
+<div class="modal fade" id="callDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="callDetailModalLabel">Call Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="call-detail-content">
+                <!-- Loaded dynamically -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bulk Operations Modal -->
+<div class="modal fade" id="bulkOperationsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title"><i class="bi bi-lightning-charge"></i> Bulk Operations</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <ul class="nav nav-tabs mb-3" id="bulkOperationsTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="substatus-tab" data-bs-toggle="tab" data-bs-target="#substatus-pane" type="button">
+                            <i class="bi bi-tag"></i> Update Substatus
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="schedule-tab" data-bs-toggle="tab" data-bs-target="#schedule-pane" type="button">
+                            <i class="bi bi-calendar-event"></i> Reschedule
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="notes-tab" data-bs-toggle="tab" data-bs-target="#notes-pane" type="button">
+                            <i class="bi bi-chat-left-text"></i> Add Notes
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="sms-tab" data-bs-toggle="tab" data-bs-target="#sms-pane" type="button">
+                            <i class="bi bi-chat-dots"></i> SMS Generator
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content" id="bulkOperationsTabContent">
+                    <!-- Substatus Tab -->
+                    <div class="tab-pane fade show active" id="substatus-pane">
+                        <div class="mb-3">
+                            <label for="substatus-select" class="form-label fw-bold">Select Substatus:</label>
+                            <select class="form-select" id="substatus-select">
+                                <option value="ACT35" selected>WAITING ON CUSTOMER</option>
+                                <option value="ACT03">APPOINTMENT SCHEDULED</option>
+                                <option value="ACT02">APPOINTMENT CONFIRMED</option>
+                                <option value="ACT38">WAITING ON TECH SUPPORT</option>
+                                <option value="ACT34">WAITING ON AUTHORIZATION</option>
+                                <option value="ACT36">WAITING ON PARTS</option>
+                                <option value="ACT37">WAITING ON PRODUCT</option>
+                                <option value="ACT18">PARTS RECEIVED</option>
+                                <option value="ACT17">PARTS ORDERED</option>
+                                <option value="ACT16">PARTS ON BACKORDER</option>
+                                <option value="ACT28">RESCHEDULED</option>
+                                <option value="ACT29">RESCHEDULED- CUSTOMER REQUEST</option>
+                                <option value="ACT30">RESCHEDULED- OTHER</option>
+                                <option value="ACT10">CUSTOMER CONTACTED</option>
+                                <option value="ACT11">EN ROUTE</option>
+                                <option value="ACT14">ON SITE</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="substatus-notes" class="form-label">Optional Notes:</label>
+                            <textarea class="form-control" id="substatus-notes" rows="3" placeholder="Enter any notes..."></textarea>
+                        </div>
+                        <button class="btn btn-primary w-100" onclick="bulkUpdateSubstatus(document.getElementById('substatus-select').value, document.getElementById('substatus-notes').value)">
+                            <i class="bi bi-check-circle"></i> Update Substatus for Selected Calls
+                        </button>
+                    </div>
+
+                    <!-- Reschedule Tab -->
+                    <div class="tab-pane fade" id="schedule-pane">
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> Rescheduling will automatically set substatus to <strong>WAITING ON CUSTOMER</strong>
+                        </div>
+                        <div class="mb-3">
+                            <label for="schedule-date" class="form-label fw-bold">New Schedule Date:</label>
+                            <input type="date" class="form-control" id="schedule-date">
+                        </div>
+                        <div class="mb-3">
+                            <label for="schedule-notes" class="form-label">Optional Notes:</label>
+                            <textarea class="form-control" id="schedule-notes" rows="3" placeholder="Reason for rescheduling..."></textarea>
+                        </div>
+                        <button class="btn btn-primary w-100" onclick="bulkUpdateScheduleDate(document.getElementById('schedule-date').value.replace(/-/g, ''), document.getElementById('schedule-notes').value)">
+                            <i class="bi bi-calendar-check"></i> Reschedule Selected Calls
+                        </button>
+                    </div>
+
+                    <!-- Add Notes Tab -->
+                    <div class="tab-pane fade" id="notes-pane">
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> Add ticket numbers or other notes without changing status
+                        </div>
+                        <div class="mb-3">
+                            <label for="ticket-number" class="form-label fw-bold">Ticket Number:</label>
+                            <input type="text" class="form-control" id="ticket-number" placeholder="e.g., 70590">
+                        </div>
+                        <button class="btn btn-primary w-100" onclick="bulkAddTicketNotes(document.getElementById('ticket-number').value)">
+                            <i class="bi bi-chat-left-text"></i> Add Notes to Selected Calls
+                        </button>
+                    </div>
+
+                    <!-- SMS Generator Tab -->
+                    <div class="tab-pane fade" id="sms-pane">
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> Generate customized SMS message for Google Voice
+                        </div>
+                        <div class="mb-3">
+                            <label for="sms-customer-name" class="form-label fw-bold">Customer Name:</label>
+                            <input type="text" class="form-control" id="sms-customer-name" placeholder="e.g., John Smith">
+                        </div>
+                        <div class="mb-3">
+                            <label for="sms-product" class="form-label fw-bold">Product:</label>
+                            <input type="text" class="form-control" id="sms-product" placeholder="e.g., Dishwasher">
+                        </div>
+                        <div class="mb-3">
+                            <label for="sms-dealer-invoice" class="form-label">Dealer Invoice (Optional):</label>
+                            <input type="text" class="form-control" id="sms-dealer-invoice" placeholder="e.g., 70590">
+                        </div>
+                        <button class="btn btn-success w-100 mb-3" onclick="generateSMSMessage()">
+                            <i class="bi bi-magic"></i> Generate SMS
+                        </button>
+
+                        <div class="card bg-light">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <span class="fw-bold">Generated Message</span>
+                                <button class="btn btn-sm btn-outline-primary" onclick="copySMSToClipboard()">
+                                    <i class="bi bi-clipboard"></i> Copy
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <textarea class="form-control" id="sms-output" rows="12" readonly></textarea>
+                                <div class="text-muted small mt-2" id="sms-char-count">0 characters</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/dist/calls.js') }}"></script>
+<script src="{{ url_for('static', filename='js/dist/charts.js') }}"></script>
+<script>
+    // Initialize date range to last 2 days
+    setDateRange(2);
+
+    // Auto-fetch calls on page load
+    window.addEventListener('DOMContentLoaded', function() {
+        // Only fetch if credentials exist
+        {% if session.credentials %}
+        setTimeout(() => fetchCalls(), 500);
+        {% endif %}
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,16 @@
+{
+  "name": "servicedispatch",
+  "version": "1.0.0",
+  "description": "ServiceDispatch - Field Service Management Application",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "clean": "rm -rf static/js/dist",
+    "dev": "tsc --watch"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  },
+  "author": "Metro TV & Appliance",
+  "license": "ISC"
+}

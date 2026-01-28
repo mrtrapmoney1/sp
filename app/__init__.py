@@ -123,12 +123,14 @@ def register_blueprints(app: Flask) -> None:
     from .api.parts import parts_bp
     from .api.export import export_bp
     from .api.imports import imports_bp
+    from .api.bulk_operations import bulk_bp
 
     app.register_blueprint(auth_bp, url_prefix='/api')
     app.register_blueprint(calls_bp, url_prefix='/api')
     app.register_blueprint(parts_bp, url_prefix='/api')
     app.register_blueprint(export_bp, url_prefix='/api')
     app.register_blueprint(imports_bp, url_prefix='/api')
+    app.register_blueprint(bulk_bp)  # No prefix - routes already include /api/bulk/
 
     # View blueprints
     from .views.main import main_bp
